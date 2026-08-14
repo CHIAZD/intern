@@ -1,0 +1,18 @@
+{
+   
+       "currency": [
+        "RM",
+        "USD",
+        "SGD",
+        "CNY",
+        "EUR"
+    ],
+    "uom": [
+        "PCS",
+        "BOX",
+        "CTN",
+        "KG",
+        "CM"
+    ]
+
+}

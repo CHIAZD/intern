@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Vendor</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 9px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        .required {
+            color: red;
+        }
+
+        .button-row {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .create-btn {
+            background: #1769aa;
+            color: white;
+        }
+
+        .create-btn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .back-btn {
+            background: #555;
+            color: white;
+            margin-right: 5px;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<h1>Create Vendor</h1>
+
+
+<div
+    id="message"
+    class="message"
+></div>
+
+
+<div class="section">
+
+
+    <h2>Vendor Information</h2>
+
+
+    <div class="form-row">
+
+
+        <div class="form-group">
+
+            <label>
+                Vendor ID
+                <span class="required">*</span>
+            </label>
+
+            <input
+                type="text"
+                id="vendorId"
+                maxlength="20"
+                placeholder="Enter Vendor ID"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Company Name
+                <span class="required">*</span>
+            </label>
+
+            <input
+                type="text"
+                id="companyName"
+                maxlength="255"
+                placeholder="Enter Company Name"
+            >
+
+        </div>
+
+
+    </div>
+
+
+    <div class="form-row">
+
+
+        <div class="form-group">
+
+            <label>PIC</label>
+
+            <input
+                type="text"
+                id="pic"
+                maxlength="100"
+                placeholder="Enter PIC"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Telephone</label>
+
+            <input
+                type="text"
+                id="tel"
+                maxlength="50"
+                placeholder="Enter Telephone"
+            >
+
+        </div>
+
+
+    </div>
+
+
+    <div class="form-row">
+
+
+        <div class="form-group">
+
+            <label>Factory</label>
+
+            <input
+                type="text"
+                id="factory"
+                maxlength="255"
+                placeholder="Enter Factory"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Purchaser Code</label>
+
+            <input
+                type="text"
+                id="purchaserCode"
+                maxlength="50"
+                placeholder="Enter Purchaser Code"
+            >
+
+        </div>
+
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label>Address</label>
+
+        <textarea
+            id="address"
+            rows="4"
+            maxlength="500"
+            placeholder="Enter Vendor Address"
+        ></textarea>
+
+    </div>
+
+
+    <div class="button-row">
+
+        <button
+            type="button"
+            class="back-btn"
+            onclick="goBack()"
+        >
+            Back
+        </button>
+
+
+        <button
+            type="button"
+            id="createButton"
+            class="create-btn"
+            onclick="createVendor()"
+        >
+            Create Vendor
+        </button>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+/*
+|--------------------------------------------------------------------------
+| Check Login / Permission
+|--------------------------------------------------------------------------
+*/
+
+let currentUser = null;
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+
+        const authenticated =
+            await checkPermission();
+
+        if (!authenticated) {
+            return;
+        }
+
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Authentication
+|--------------------------------------------------------------------------
+*/
+
+async function checkPermission() {
+
+    try {
+
+        const response =
+            await fetch("api/auth.php");
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            window.location.href =
+                "login.html";
+
+            return false;
+        }
+
+
+        currentUser =
+            result.data;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Level 2 Only
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            parseInt(
+                currentUser.user_level
+            ) !== 2
+        ) {
+
+            alert(
+                "Permission denied. Level 2 is required."
+            );
+
+            window.location.href =
+                "index.html";
+
+            return false;
+        }
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "Authentication error:",
+            error
+        );
+
+        window.location.href =
+            "login.html";
+
+        return false;
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Create Vendor
+|--------------------------------------------------------------------------
+*/
+
+async function createVendor() {
+
+
+    clearMessage();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Get Values
+    |--------------------------------------------------------------------------
+    */
+
+    const vendorId =
+        document
+            .getElementById("vendorId")
+            .value
+            .trim();
+
+
+    const companyName =
+        document
+            .getElementById("companyName")
+            .value
+            .trim();
+
+
+    const pic =
+        document
+            .getElementById("pic")
+            .value
+            .trim();
+
+
+    const address =
+        document
+            .getElementById("address")
+            .value
+            .trim();
+
+
+    const tel =
+        document
+            .getElementById("tel")
+            .value
+            .trim();
+
+
+    const factory =
+        document
+            .getElementById("factory")
+            .value
+            .trim();
+
+
+    const purchaserCode =
+        document
+            .getElementById("purchaserCode")
+            .value
+            .trim();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Frontend Validation
+    |--------------------------------------------------------------------------
+    */
+
+    if (!vendorId) {
+
+        showMessage(
+            "Vendor ID is required.",
+            false
+        );
+
+        return;
+    }
+
+
+    if (!companyName) {
+
+        showMessage(
+            "Company Name is required.",
+            false
+        );
+
+        return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Prepare Data
+    |--------------------------------------------------------------------------
+    */
+
+    const data = {
+
+        vendor_id:
+            vendorId,
+
+        company_name:
+            companyName,
+
+        pic:
+            pic,
+
+        address:
+            address,
+
+        tel:
+            tel,
+
+        factory:
+            factory,
+
+        purchaser_code:
+            purchaserCode
+
+    };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Disable Button
+    |--------------------------------------------------------------------------
+    */
+
+    const button =
+        document.getElementById(
+            "createButton"
+        );
+
+
+    button.disabled = true;
+
+    button.textContent =
+        "Creating...";
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Send API
+    |--------------------------------------------------------------------------
+    */
+
+    try {
+
+        const response =
+            await fetch(
+                "api/vendor_create.php",
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify(data)
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Failed
+        |--------------------------------------------------------------------------
+        */
+
+        if (!result.success) {
+
+            showMessage(
+                result.message ||
+                "Failed to create vendor.",
+                false
+            );
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Success
+        |--------------------------------------------------------------------------
+        */
+
+        showMessage(
+            "Vendor created successfully. Vendor ID: " +
+            result.data.vendor_id,
+            true
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Clear Form
+        |--------------------------------------------------------------------------
+        */
+
+        document.getElementById(
+            "vendorId"
+        ).value = "";
+
+
+        document.getElementById(
+            "companyName"
+        ).value = "";
+
+
+        document.getElementById(
+            "pic"
+        ).value = "";
+
+
+        document.getElementById(
+            "address"
+        ).value = "";
+
+
+        document.getElementById(
+            "tel"
+        ).value = "";
+
+
+        document.getElementById(
+            "factory"
+        ).value = "";
+
+
+        document.getElementById(
+            "purchaserCode"
+        ).value = "";
+
+
+    } catch (error) {
+
+        console.error(
+            "Create Vendor Error:",
+            error
+        );
+
+
+        showMessage(
+            "Server error. Please check browser console.",
+            false
+        );
+
+
+    } finally {
+
+        button.disabled = false;
+
+        button.textContent =
+            "Create Vendor";
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Back
+|--------------------------------------------------------------------------
+*/
+
+function goBack() {
+
+    window.location.href =
+        "index.html";
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Message
+|--------------------------------------------------------------------------
+*/
+
+function showMessage(
+    message,
+    success
+) {
+
+    const element =
+        document.getElementById(
+            "message"
+        );
+
+
+    element.textContent =
+        message;
+
+
+    element.className =
+        "message " +
+        (
+            success
+                ? "success"
+                : "error"
+        );
+
+
+    element.style.display =
+        "block";
+
+}
+
+
+function clearMessage() {
+
+    const element =
+        document.getElementById(
+            "message"
+        );
+
+
+    element.style.display =
+        "none";
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>

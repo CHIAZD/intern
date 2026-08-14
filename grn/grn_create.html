@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Goods Received Note</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        table input,
+        table select {
+            width: 100%;
+        }
+
+        button {
+            padding: 9px 16px;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .import-btn {
+            background: #1769aa;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #c0392b;
+            color: white;
+        }
+
+        .save-btn {
+            background: #2d7d46;
+            color: white;
+            font-size: 16px;
+            padding: 12px 25px;
+        }
+
+        .other-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .total-box {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .empty-message {
+            padding: 25px;
+            color: #777;
+            text-align: center;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<h1>Create Goods Received Note</h1>
+
+
+<!-- =========================================================
+     GRN INFORMATION
+========================================================== -->
+
+<div class="section">
+
+    <h2>GRN Information</h2>
+
+    <div class="form-row">
+
+        <div class="form-group">
+
+            <label>GRN Number</label>
+
+            <input
+                type="text"
+                id="grnId"
+                value="Loading..."
+                readonly
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>GRN Date</label>
+
+            <input
+                type="date"
+                id="grnDate"
+                readonly
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Status</label>
+
+            <input
+                type="text"
+                id="grnStatus"
+                value="DRAFT"
+                readonly
+            >
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     GRN ITEMS
+========================================================== -->
+
+<div class="section">
+
+    <h2>GRN Items</h2>
+
+
+    <button
+        type="button"
+        class="import-btn"
+        onclick="importExcel()"
+    >
+        Import Excel
+    </button>
+
+    <input
+        type="file"
+        id="excelFile"
+        accept=".xlsx,.xls, .csv"
+        style="display:none;"
+        onchange="handleExcelSelected(event)"
+    >
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>No.</th>
+
+                <th>Item Code</th>
+
+                <th>Description</th>
+
+                <th>QTY</th>
+
+                <th>UOM</th>
+
+                <th>QTY per Carton</th>
+
+                <th>Total QTY</th>
+
+                <th>Unit Price</th>
+
+                <th>Sub Total</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="itemsBody">
+
+            <tr id="emptyRow">
+
+                <td
+                    colspan="9"
+                    class="empty-message"
+                >
+                    No GRN items. Please import an Excel invoice.
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+
+    <div class="total-box">
+
+        <div>
+            Total Qty:
+            <span id="totalQty">0</span>
+        </div>
+
+        <div>
+            Total Amount:
+            <span id="totalAmount">RM 0.00</span>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     OTHERS
+========================================================== -->
+
+<div class="section">
+
+    <button
+        type="button"
+        class="other-btn"
+        onclick="toggleOthers()"
+    >
+        Others
+    </button>
+
+
+    <div
+        id="othersSection"
+        class="hidden"
+        style="margin-top:20px;"
+    >
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label>ETD Date</label>
+
+                <input
+                    type="date"
+                    id="etdDate"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>ETA Date</label>
+
+                <input
+                    type="date"
+                    id="etaDate"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label>Exchange Rate</label>
+
+                <input
+                    type="number"
+                    id="exchangeRate"
+                    min="0"
+                    step="0.000001"
+                    placeholder="Enter exchange rate"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Entry</label>
+
+                <input
+                    type="text"
+                    id="entry"
+                    placeholder="Enter entry"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label>Cost per Entry</label>
+
+                <input
+                    type="number"
+                    id="costPerEntry"
+                    min="0"
+                    step="0.01"
+                    placeholder="Enter cost per entry"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Carton Number</label>
+
+                <input
+                    type="text"
+                    id="cartonNumber"
+                    placeholder="Enter carton number"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     SAVE
+========================================================== -->
+
+<div class="section">
+
+    <button
+        type="button"
+        class="save-btn"
+        id="saveButton"
+        onclick="saveGRN()"
+    >
+        Save GRN
+    </button>
+
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+</div>
+
+
+
+<script>
+
+/*
+|--------------------------------------------------------------------------
+| Global Data
+|--------------------------------------------------------------------------
+*/
+
+let grnItems = [];
+
+
+/*
+|--------------------------------------------------------------------------
+| Page Initialize
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        setGRNDate();
+
+        loadNextGRNId();
+
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Set GRN Date
+|--------------------------------------------------------------------------
+*/
+
+function setGRNDate() {
+
+    const today =
+        new Date();
+
+    const year =
+        today.getFullYear();
+
+    const month =
+        String(
+            today.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            today.getDate()
+        ).padStart(2, "0");
+
+    document.getElementById(
+        "grnDate"
+    ).value =
+        `${year}-${month}-${day}`;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Load Next GRN ID
+|--------------------------------------------------------------------------
+*/
+
+async function loadNextGRNId() {
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/grn_next_id.php"
+            );
+
+        const result =
+            await response.json();
+
+        if (!result.success) {
+
+            document.getElementById(
+                "grnId"
+            ).value =
+                "Unable to generate";
+
+            console.error(
+                result.message
+            );
+
+            return;
+        }
+
+        document.getElementById(
+            "grnId"
+        ).value =
+            result.grn_id;
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed to load GRN ID:",
+            error
+        );
+
+        document.getElementById(
+            "grnId"
+        ).value =
+            "Unable to generate";
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Import Excel
+|--------------------------------------------------------------------------
+*/
+
+function importExcel() {
+
+    document.getElementById(
+        "excelFile"
+    ).click();
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Excel Selected
+|--------------------------------------------------------------------------
+*/
+async function handleExcelSelected(event) {
+
+    const file = event.target.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    clearMessage();
+
+    try {
+
+        let rows = [];
+
+        /*
+        |--------------------------------------------------------------------------
+        | CSV File
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            file.name.toLowerCase().endsWith(".csv")
+        ) {
+
+            const csvText =
+                await file.text();
+
+            const workbook =
+                XLSX.read(
+                    csvText,
+                    {
+                        type: "string"
+                    }
+                );
+
+            const sheetName =
+                workbook.SheetNames[0];
+
+            const worksheet =
+                workbook.Sheets[sheetName];
+
+            rows =
+                XLSX.utils.sheet_to_json(
+                    worksheet,
+                    {
+                        defval: ""
+                    }
+                );
+
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Excel File
+        |--------------------------------------------------------------------------
+        */
+
+        else {
+
+            const arrayBuffer =
+                await file.arrayBuffer();
+
+            const workbook =
+                XLSX.read(
+                    arrayBuffer,
+                    {
+                        type: "array"
+                    }
+                );
+
+            const sheetName =
+                workbook.SheetNames[0];
+
+            const worksheet =
+                workbook.Sheets[sheetName];
+
+            rows =
+                XLSX.utils.sheet_to_json(
+                    worksheet,
+                    {
+                        defval: ""
+                    }
+                );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Empty File
+        |--------------------------------------------------------------------------
+        */
+
+        if (rows.length === 0) {
+
+            alert(
+                "The file is empty."
+            );
+
+            event.target.value = "";
+
+            return;
+        }
+
+
+        console.log(
+            "Imported Rows:",
+            rows
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Send Data To Backend
+        |--------------------------------------------------------------------------
+        */
+
+        const response =
+            await fetch(
+                "../api/grn_validate_excel.php",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            rows: rows
+                        })
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        console.log(
+            "GRN Validation Result:",
+            result
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validation Failed
+        |--------------------------------------------------------------------------
+        */
+
+        if (!result.success) {
+
+            showExcelErrors(
+                result.errors || []
+            );
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validation Successful
+        |--------------------------------------------------------------------------
+        */
+
+        grnItems =
+            result.items || [];
+
+
+        loadImportedGRNItems(
+            grnItems
+        );
+
+
+        showMessage(
+            "File import successful. " +
+            grnItems.length +
+            " item(s) loaded.",
+            true
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "File import error:",
+            error
+        );
+
+        showMessage(
+            "Failed to import file.",
+            false
+        );
+
+    }
+
+    finally {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reset File Input
+        |--------------------------------------------------------------------------
+        */
+
+        event.target.value = "";
+
+    }
+
+}
+
+function showExcelErrors(errors) {
+
+    if (!errors || errors.length === 0) {
+        alert("Excel import failed.");
+        return;
+    }
+
+    let message =
+        "Excel import failed.\n\n";
+
+    errors.forEach(function (error) {
+
+        message +=
+            "Row " +
+            error.row +
+            ": " +
+            error.message +
+            "\n";
+
+    });
+
+    alert(message);
+
+    showExcelErrorRows(errors);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Add GRN Item
+|--------------------------------------------------------------------------
+|
+| This function is mainly for testing the table.
+| The final GRN flow will normally populate items
+| from Excel Import.
+|
+*/
+
+function addTestItem(
+    itemCode,
+    description,
+    quantity,
+    uom,
+    qtyPerCarton,
+    unitPrice
+) {
+
+    const emptyRow =
+        document.getElementById(
+            "emptyRow"
+        );
+
+    if (emptyRow) {
+
+        emptyRow.remove();
+
+    }
+
+
+    const row =
+        document.createElement("tr");
+
+
+    const numberCell =
+        document.createElement("td");
+
+
+    const itemCodeCell =
+        document.createElement("td");
+
+    itemCodeCell.textContent =
+        itemCode;
+
+
+    const descriptionCell =
+        document.createElement("td");
+
+    descriptionCell.textContent =
+        description;
+
+
+    const quantityInput =
+        document.createElement("input");
+
+    quantityInput.type =
+        "number";
+
+    quantityInput.min =
+        "1";
+
+    quantityInput.step =
+        "1";
+
+    quantityInput.value =
+        quantity;
+
+
+    const quantityCell =
+        document.createElement("td");
+
+    quantityCell.appendChild(
+        quantityInput
+    );
+
+
+    const uomCell =
+        document.createElement("td");
+
+    uomCell.textContent =
+        uom;
+
+
+    const qtyPerCartonInput =
+        document.createElement("input");
+
+    qtyPerCartonInput.type =
+        "number";
+
+    qtyPerCartonInput.min =
+        "0";
+
+    qtyPerCartonInput.step =
+        "1";
+
+    qtyPerCartonInput.value =
+        qtyPerCarton;
+
+
+    const qtyPerCartonCell =
+        document.createElement("td");
+
+    qtyPerCartonCell.appendChild(
+        qtyPerCartonInput
+    );
+
+
+    const totalQtyInput =
+        document.createElement("input");
+
+    totalQtyInput.type =
+        "number";
+
+    totalQtyInput.readOnly =
+        true;
+
+
+    const totalQtyCell =
+        document.createElement("td");
+
+    totalQtyCell.appendChild(
+        totalQtyInput
+    );
+
+
+    const unitPriceInput =
+        document.createElement("input");
+
+    unitPriceInput.type =
+        "number";
+
+    unitPriceInput.min =
+        "0";
+
+    unitPriceInput.step =
+        "0.01";
+
+    unitPriceInput.value =
+        unitPrice;
+
+
+    const unitPriceCell =
+        document.createElement("td");
+
+    unitPriceCell.appendChild(
+        unitPriceInput
+    );
+
+
+    const subTotalInput =
+        document.createElement("input");
+
+    subTotalInput.type =
+        "number";
+
+    subTotalInput.readOnly =
+        true;
+
+
+    const subTotalCell =
+        document.createElement("td");
+
+    subTotalCell.appendChild(
+        subTotalInput
+    );
+
+
+    function calculateRow() {
+
+        const qty =
+            parseInt(
+                quantityInput.value
+            ) || 0;
+
+
+        const perCarton =
+            parseInt(
+                qtyPerCartonInput.value
+            ) || 0;
+
+
+        const price =
+            parseFloat(
+                unitPriceInput.value
+            ) || 0;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Total QTY
+        |--------------------------------------------------------------------------
+        |
+        | QTY × QTY per Carton
+        |
+        */
+
+        const totalQty =
+            qty * perCarton;
+
+
+        totalQtyInput.value =
+            totalQty;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sub Total
+        |--------------------------------------------------------------------------
+        */
+
+        const subtotal =
+            totalQty * price;
+
+
+        subTotalInput.value =
+            subtotal.toFixed(2);
+
+
+        calculateTotals();
+
+    }
+
+
+    quantityInput.addEventListener(
+        "input",
+        calculateRow
+    );
+
+
+    qtyPerCartonInput.addEventListener(
+        "input",
+        calculateRow
+    );
+
+
+    unitPriceInput.addEventListener(
+        "input",
+        calculateRow
+    );
+
+
+    row.appendChild(
+        numberCell
+    );
+
+    row.appendChild(
+        itemCodeCell
+    );
+
+    row.appendChild(
+        descriptionCell
+    );
+
+    row.appendChild(
+        quantityCell
+    );
+
+    row.appendChild(
+        uomCell
+    );
+
+    row.appendChild(
+        qtyPerCartonCell
+    );
+
+    row.appendChild(
+        totalQtyCell
+    );
+
+    row.appendChild(
+        unitPriceCell
+    );
+
+    row.appendChild(
+        subTotalCell
+    );
+
+
+    document.getElementById(
+        "itemsBody"
+    ).appendChild(row);
+
+
+    calculateRow();
+
+    updateItemNumbers();
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Update Item Numbers
+|--------------------------------------------------------------------------
+*/
+
+function updateItemNumbers() {
+
+    const rows =
+        document.querySelectorAll(
+            "#itemsBody tr"
+        );
+
+
+    rows.forEach(
+        function (row, index) {
+
+            if (
+                row.id !==
+                "emptyRow"
+            ) {
+
+                row.children[0]
+                    .textContent =
+                    index + 1;
+
+            }
+
+        }
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Calculate Totals
+|--------------------------------------------------------------------------
+*/
+
+function calculateTotals() {
+
+    let totalQty = 0;
+
+    let totalAmount = 0;
+
+    const rows =
+        document.querySelectorAll(
+            "#itemsBody tr"
+        );
+
+    rows.forEach(function (row) {
+
+        if (
+            row.id === "emptyRow"
+        ) {
+            return;
+        }
+
+        const inputs =
+            row.querySelectorAll("input");
+
+        /*
+        inputs:
+
+        0 = quantity
+        1 = qty per carton
+        2 = total qty
+        3 = unit price
+        4 = subtotal
+        */
+
+        if (
+            inputs.length < 5
+        ) {
+            return;
+        }
+
+        const qty =
+            parseInt(
+                inputs[0].value
+            ) || 0;
+
+        const subtotal =
+            parseFloat(
+                inputs[4].value
+            ) || 0;
+
+        totalQty += qty;
+
+        totalAmount += subtotal;
+
+    });
+
+    document.getElementById(
+        "totalQty"
+    ).textContent =
+        totalQty;
+
+    document.getElementById(
+        "totalAmount"
+    ).textContent =
+        "RM " +
+        totalAmount.toFixed(2);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Toggle Others
+|--------------------------------------------------------------------------
+*/
+
+function toggleOthers() {
+
+    const section =
+        document.getElementById(
+            "othersSection"
+        );
+
+
+    section.classList.toggle(
+        "hidden"
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Collect GRN Items
+|--------------------------------------------------------------------------
+*/
+
+function collectGRNItems() {
+
+    const rows =
+        document.querySelectorAll("#itemsBody tr");
+
+    const items = [];
+
+
+    rows.forEach(function (row) {
+
+        if (row.id === "emptyRow") {
+            return;
+        }
+
+
+        const inputs =
+            row.querySelectorAll("input");
+
+
+        if (inputs.length < 5) {
+            return;
+        }
+
+
+        const itemCode =
+            row.children[1]
+                .textContent
+                .trim();
+
+
+        const description =
+            row.children[2]
+                .textContent
+                .trim();
+
+
+        const quantity =
+            parseInt(inputs[0].value) || 0;
+
+
+        const uom =
+            row.children[4]
+                .textContent
+                .trim();
+
+
+        const qtyPerCarton =
+            parseInt(inputs[1].value) || 0;
+
+
+        const totalQty =
+            parseInt(inputs[2].value) || 0;
+
+
+        const unitPrice =
+            parseFloat(inputs[3].value) || 0;
+
+
+        const subTotal =
+            parseFloat(inputs[4].value) || 0;
+
+
+        items.push({
+
+            po_id:
+                row.dataset.poId || null,
+
+            po_item_id:
+                row.dataset.poItemId || null,
+
+            product_id:
+                itemCode,
+
+            item_name:
+                description,
+
+            quantity:
+                quantity,
+
+            uom:
+                uom,
+
+            qty_per_carton:
+                qtyPerCarton,
+
+            total_qty:
+                totalQty,
+
+            unit_price_myr:
+                unitPrice,
+
+            sub_total:
+                subTotal
+
+        });
+
+    });
+
+
+    return items;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Save GRN
+|--------------------------------------------------------------------------
+*/
+
+async function saveGRN() {
+
+    clearMessage();
+
+    const grnId =
+        document.getElementById("grnId").value.trim();
+
+    if (
+        !grnId ||
+        grnId === "Loading..." ||
+        grnId === "Unable to generate"
+    ) {
+        alert("GRN Number is not available.");
+        return;
+    }
+
+    const items = collectGRNItems();
+
+    if (items.length === 0) {
+        alert("Please import an Excel invoice before saving the GRN.");
+        return;
+    }
+
+    const data = {
+
+        grn_id: grnId,
+
+        grn_date:
+            document.getElementById("grnDate").value,
+
+        status:
+            document.getElementById("grnStatus").value,
+
+        etd_date:
+            document.getElementById("etdDate").value || null,
+
+        eta_date:
+            document.getElementById("etaDate").value || null,
+
+        exchange_rate:
+            document.getElementById("exchangeRate").value
+                ? parseFloat(
+                    document.getElementById("exchangeRate").value
+                )
+                : null,
+
+        entry:
+            document.getElementById("entry").value.trim() || null,
+
+        cost_per_entry:
+            document.getElementById("costPerEntry").value
+                ? parseFloat(
+                    document.getElementById("costPerEntry").value
+                )
+                : null,
+
+        carton_number:
+            document.getElementById("cartonNumber").value.trim() || null,
+
+        items: items
+    };
+
+
+    const saveButton =
+        document.getElementById("saveButton");
+
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
+
+
+    try {
+
+        const response = await fetch(
+            "../api/grn_save.php",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(data)
+            }
+        );
+
+
+        const result = await response.json();
+
+
+        if (!result.success) {
+
+            showMessage(
+                result.message || "Failed to save GRN.",
+                false
+            );
+
+            return;
+        }
+
+
+        showMessage(
+            "GRN saved successfully: " +
+            result.grn_id,
+            true
+        );
+
+
+        alert(
+            "GRN saved successfully!\n\nGRN ID: " +
+            result.grn_id
+        );
+
+
+    }
+    catch (error) {
+
+        console.error("Save GRN Error:", error);
+
+        showMessage(
+            "Failed to connect to GRN save API.",
+            false
+        );
+
+    }
+    finally {
+
+        saveButton.disabled = false;
+        saveButton.textContent = "Save GRN";
+
+    }
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| Message
+|--------------------------------------------------------------------------
+*/
+
+function showMessage(message, success) {
+
+    const element =
+        document.getElementById("message");
+
+    element.textContent =
+        message;
+
+    element.className =
+        "message " +
+        (success ? "success" : "error");
+
+    element.style.display =
+        "block";
+}
+
+
+function clearMessage() {
+
+    const element =
+        document.getElementById("message");
+
+    element.style.display =
+        "none";
+}
+
+
+function showExcelErrorRows(errors) {
+
+    const itemsBody =
+        document.getElementById("itemsBody");
+
+    itemsBody.innerHTML = "";
+
+    errors.forEach(function (error) {
+
+        const row =
+            document.createElement("tr");
+
+        row.style.backgroundColor =
+            "#f8d7da";
+
+        row.style.color =
+            "#721c24";
+
+        row.innerHTML = `
+
+            <td></td>
+
+            <td>
+                ${error.row}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    error.item_code || "-"
+                )}
+            </td>
+
+            <td colspan="7">
+                ${escapeHtml(
+                    error.message
+                )}
+            </td>
+
+        `;
+
+        itemsBody.appendChild(row);
+
+    });
+}
+
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+function loadImportedGRNItems(items) {
+
+    const itemsBody =
+        document.getElementById("itemsBody");
+
+    itemsBody.innerHTML = "";
+
+    items.forEach(function (item) {
+
+        addImportedItem(item);
+
+    });
+
+    updateItemNumbers();
+
+    calculateTotals();
+}
+
+
+function addImportedItem(item) {
+
+    const row =
+        document.createElement("tr");
+
+    row.innerHTML = `
+
+        <td></td>
+
+        <td>
+            ${escapeHtml(item.product_id || "")}
+        </td>
+
+        <td>
+            ${escapeHtml(item.item_name || "")}
+        </td>
+
+        <td>
+            <input
+                type="number"
+                min="1"
+                step="1"
+                value="${item.quantity || 0}"
+                readonly
+            >
+        </td>
+
+        <td>
+            ${escapeHtml(item.uom || "")}
+        </td>
+
+        <td>
+            <input
+                type="number"
+                min="1"
+                step="1"
+                value="${item.qty_per_carton || 0}"
+                readonly
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                value="${item.total_qty || 0}"
+                readonly
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                step="0.01"
+                value="${item.unit_price_myr || 0}"
+                readonly
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                step="0.01"
+                value="${item.sub_total || 0}"
+                readonly
+            >
+        </td>
+
+    `;
+
+    row.dataset.poId =
+        item.po_id || "";
+
+    row.dataset.poItemId =
+        item.po_item_id || "";
+
+    document.getElementById(
+        "itemsBody"
+    ).appendChild(row);
+}
+
+
+</script>
+
+</body>
+
+</html>
+

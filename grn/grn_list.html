@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>GRN List</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .toolbar input {
+            padding: 8px 12px;
+            width: 280px;
+        }
+
+        button {
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .table-container {
+            background: white;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        tr:hover {
+            background: #f8f8f8;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .status-draft {
+            color: #555;
+        }
+
+        .status-submitted {
+            color: #0066cc;
+        }
+
+        .status-approved {
+            color: green;
+        }
+
+        .status-cancelled {
+            color: red;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+        }
+
+
+        /* =========================================================
+   TOP NAVIGATION BAR
+========================================================= */
+
+.top-bar {
+    width: 100%;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+
+    background: #333;
+    color: white;
+
+    padding: 0 20px;
+
+    box-sizing: border-box;
+
+    margin-bottom: 25px;
+}
+
+
+/* System Name */
+
+.top-bar-title {
+    font-size: 18px;
+    font-weight: bold;
+
+    margin-right: 40px;
+
+    white-space: nowrap;
+}
+
+
+/* Navigation */
+
+.top-bar-nav {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    flex: 1;
+}
+
+
+/* Navigation Link */
+
+.top-bar-nav a {
+    color: white;
+
+    text-decoration: none;
+
+    padding: 10px 15px;
+
+    white-space: nowrap;
+}
+
+
+/* Hover */
+
+.top-bar-nav a:hover {
+    background: #555;
+}
+
+
+/* User Area */
+
+.top-bar-user {
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    white-space: nowrap;
+}
+
+
+/* Logout */
+
+.logout-btn {
+    color: white;
+
+    text-decoration: none;
+
+    padding: 8px 12px;
+
+    background: #555;
+}
+
+.logout-btn:hover {
+    background: #777;
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.top-bar {
+    width: 100%;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+
+    background: #333;
+    color: white;
+
+    padding: 0 20px;
+
+    box-sizing: border-box;
+
+    margin-bottom: 25px;
+}
+
+
+/* System Name */
+
+.top-bar-title {
+    font-size: 18px;
+    font-weight: bold;
+
+    margin-right: 35px;
+
+    white-space: nowrap;
+}
+
+
+/* Navigation */
+
+.top-bar-nav {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    flex: 1;
+}
+
+
+/* Normal navigation link */
+
+.top-bar-nav > a,
+.nav-dropdown-btn {
+    display: block;
+
+    color: white;
+
+    text-decoration: none;
+
+    padding: 10px 15px;
+
+    white-space: nowrap;
+}
+
+
+/* Hover */
+
+.top-bar-nav > a:hover,
+.nav-dropdown-btn:hover {
+    background: #555;
+}
+
+
+/* =========================================================
+   PURCHASE ORDER DROPDOWN
+========================================================= */
+
+.nav-dropdown {
+    position: relative;
+}
+
+
+/* Dropdown */
+
+.nav-dropdown-menu {
+    display: none;
+
+    position: absolute;
+
+    top: 100%;
+    left: 0;
+
+    min-width: 180px;
+
+    background: white;
+
+    border: 1px solid #ccc;
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+    z-index: 1000;
+}
+
+
+/* Dropdown links */
+
+.nav-dropdown-menu a {
+    display: block;
+
+    padding: 10px 15px;
+
+    color: #333;
+
+    text-decoration: none;
+
+    white-space: nowrap;
+}
+
+
+/* Dropdown hover */
+
+.nav-dropdown-menu a:hover {
+    background: #eee;
+}
+
+
+/* Show dropdown */
+
+.nav-dropdown:hover .nav-dropdown-menu {
+    display: block;
+}
+
+
+/* =========================================================
+   USER AREA
+========================================================= */
+
+.top-bar-user {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    white-space: nowrap;
+}
+
+
+#currentUser {
+    font-size: 14px;
+
+    font-weight: bold;
+}
+
+
+/* Logout */
+
+.logout-btn {
+    color: white;
+
+    text-decoration: none;
+
+    padding: 8px 12px;
+
+    background: #555;
+}
+
+
+.logout-btn:hover {
+    background: #777;
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     TOP NAVIGATION BAR
+====================================================== -->
+
+<div class="top-bar">
+
+
+    <!-- System Name -->
+
+    <div class="top-bar-title">
+
+        Purchasing
+
+    </div>
+
+
+    <!-- Navigation -->
+
+    <div class="top-bar-nav">
+
+
+        <!-- Purchase Order -->
+
+        <div class="nav-dropdown">
+
+            <a
+                href="../index.html"
+                class="nav-dropdown-btn"
+            >
+                Purchase Order
+            </a>
+
+
+            <div
+                class="nav-dropdown-menu"
+                id="poAdminMenu"
+            >
+
+                <a href="../index.html">
+                    PO List
+                </a>
+
+                <a href="../product_create.html">
+                    Create Product
+                </a>
+
+                <a href="../vendor_create.html">
+                    Create Vendor
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- Good Receive Note -->
+
+<div class="nav-dropdown">
+
+    <a
+        href="grn_list.html"
+        class="nav-dropdown-btn"
+    >
+        Good Receive Note
+    </a>
+
+
+    <div
+        class="nav-dropdown-menu"
+    >
+
+        <a href="grn_list.html">
+            GRN List
+        </a>
+
+        <a href="grn_stock_issue.html">
+            Stock Issue
+        </a>
+
+    </div>
+
+</div>
+
+    </div>
+
+
+    <!-- User -->
+
+    <div class="top-bar-user">
+
+        <span id="currentUser">
+            User
+        </span>
+
+
+        <a
+            href="../login.html"
+            class="logout-btn"
+            onclick="logout()"
+        >
+            Log out
+        </a>
+
+    </div>
+
+
+</div>
+
+    <!--Main Content-->
+<h1>GRN List</h1>
+
+
+<div class="toolbar">
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search GRN ID..."
+        oninput="filterGRN()"
+    >
+
+    <button onclick="loadGRNs()">
+        Refresh
+    </button>
+
+    <button onclick="goCreateGRN()">
+        + Create GRN
+    </button>
+
+</div>
+
+
+<div class="table-container">
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>GRN ID</th>
+
+                <th>GRN Date</th>
+
+                <th>Total Amount</th>
+
+                <th>Status</th>
+
+                <th>Created By</th>
+
+                <th>Created At</th>
+
+                <th>ETD</th>
+
+                <th>ETA</th>
+
+                <th>Action</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="grnTableBody">
+
+            <tr>
+
+                <td
+                    colspan="9"
+                    class="loading"
+                >
+                    Loading GRN...
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<script>
+
+
+// ============================================================
+// GLOBAL DATA
+// ============================================================
+
+let grns = [];
+
+// ============================================================
+// CURRENT USER
+// ============================================================
+
+async function loadCurrentUser() {
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/current_user.php"
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (
+            !result.success ||
+            !result.data
+        ) {
+
+            console.error(
+                "Unable to get current user."
+            );
+
+            return;
+
+        }
+
+
+        const user =
+            result.data;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Display Username
+        |--------------------------------------------------------------------------
+        */
+
+        document.getElementById(
+            "currentUser"
+        ).textContent =
+            user.username;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Level 1
+        |--------------------------------------------------------------------------
+        |
+        | Level 1 cannot create Product / Vendor.
+        |
+        */
+
+        if (
+            Number(user.user_level) !== 2
+        ) {
+
+            const adminMenu =
+                document.getElementById(
+                    "poAdminMenu"
+                );
+
+
+            const createProduct =
+                adminMenu.querySelector(
+                    'a[href="../product_create.html"]'
+                );
+
+
+            const createVendor =
+                adminMenu.querySelector(
+                    'a[href="../vendor_create.html"]'
+                );
+
+
+            if (createProduct) {
+
+                createProduct.remove();
+
+            }
+
+
+            if (createVendor) {
+
+                createVendor.remove();
+
+            }
+
+        }
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed to load current user:",
+            error
+        );
+
+    }
+
+}
+// ============================================================
+// LOAD GRNS
+// ============================================================
+
+async function loadGRNs() {
+
+    const tbody =
+        document.getElementById(
+            "grnTableBody"
+        );
+
+
+    tbody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="9"
+                class="loading"
+            >
+                Loading GRN...
+            </td>
+
+        </tr>
+
+    `;
+
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/grn_list.php"
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            throw new Error(
+                result.message ||
+                "Failed to load GRN."
+            );
+
+        }
+
+
+        grns =
+            result.data || [];
+
+
+        displayGRNs(
+            grns
+        );
+
+
+    }
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="9"
+                    class="empty"
+                >
+                    Failed to load GRN.
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+// ============================================================
+// DISPLAY GRNS
+// ============================================================
+
+function displayGRNs(data) {
+
+    const tbody =
+        document.getElementById(
+            "grnTableBody"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    if (
+        !data ||
+        data.length === 0
+    ) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="9"
+                    class="empty"
+                >
+                    No GRN found.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    data.forEach(grn => {
+
+
+        const row =
+            document.createElement(
+                "tr"
+            );
+
+
+        const status =
+            grn.Status || "DRAFT";
+
+
+        const statusClass =
+            "status-" +
+            status
+                .toLowerCase()
+                .replace(
+                    /[^a-z0-9]/g,
+                    "-"
+                );
+
+
+        row.innerHTML = `
+
+            <td>
+                ${escapeHTML(
+                    grn.GRN_ID
+                )}
+            </td>
+
+
+            <td>
+                ${escapeHTML(
+                    grn.GRN_Date
+                )}
+            </td>
+
+
+            <td>
+                ${formatAmount(
+                    grn.Total_Amount
+                )}
+            </td>
+
+
+            <td>
+
+                <span
+                    class="status ${statusClass}"
+                >
+
+                    ${escapeHTML(
+                        status
+                    )}
+
+                </span>
+
+            </td>
+
+
+            <td>
+                ${escapeHTML(
+                    grn.Created_By || "-"
+                )}
+            </td>
+
+
+            <td>
+                ${escapeHTML(
+                    grn.Created_At || "-"
+                )}
+            </td>
+
+
+            <td>
+                ${escapeHTML(
+                    grn.ETD_Date || "-"
+                )}
+            </td>
+
+
+            <td>
+                ${escapeHTML(
+                    grn.ETA_Date || "-"
+                )}
+            </td>
+
+
+            <td>
+
+                <button
+                    onclick="viewGRN(
+                        '${encodeURIComponent(
+                            grn.GRN_ID
+                        )}'
+                    )"
+                >
+                    View
+                </button>
+
+
+                <button
+                    onclick="editGRN(
+                        '${encodeURIComponent(
+                            grn.GRN_ID
+                        )}'
+                    )"
+                >
+                    Edit
+                </button>
+
+
+                <button
+                    onclick="deleteGRN(
+                        '${encodeURIComponent(
+                            grn.GRN_ID
+                        )}'
+                    )"
+                >
+                    Delete
+                </button>
+
+            </td>
+
+        `;
+
+
+        tbody.appendChild(
+            row
+        );
+
+    });
+
+}
+
+
+// ============================================================
+// SEARCH
+// ============================================================
+
+function filterGRN() {
+
+    const keyword =
+        document.getElementById(
+            "searchInput"
+        ).value
+        .trim()
+        .toLowerCase();
+
+
+    if (!keyword) {
+
+        displayGRNs(
+            grns
+        );
+
+        return;
+
+    }
+
+
+    const filtered =
+        grns.filter(
+            grn =>
+                (
+                    grn.GRN_ID ||
+                    ""
+                )
+                .toLowerCase()
+                .includes(
+                    keyword
+                )
+        );
+
+
+    displayGRNs(
+        filtered
+    );
+
+}
+
+
+// ============================================================
+// VIEW
+// ============================================================
+
+function viewGRN(grnId) {
+
+    grnId =
+        decodeURIComponent(
+            grnId
+        );
+
+
+    /*
+     * View page will be created next.
+     */
+
+    window.location.href =
+        "grn_view.html?grn_id=" +
+        encodeURIComponent(
+            grnId
+        );
+
+}
+
+
+// ============================================================
+// EDIT
+// ============================================================
+
+function editGRN(grnId) {
+
+    grnId =
+        decodeURIComponent(
+            grnId
+        );
+
+
+    /*
+     * Edit page will be created next.
+     */
+
+    window.location.href =
+        "grn_edit.html?grn_id=" +
+        encodeURIComponent(
+            grnId
+        );
+
+}
+
+
+// ============================================================
+// DELETE
+// ============================================================
+
+async function deleteGRN(grnId) {
+
+    grnId =
+        decodeURIComponent(grnId);
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete GRN "
+            + grnId
+            + "?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/grn_delete.php",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        GRN_ID: grnId
+
+                    })
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            alert(
+                "Delete failed: "
+                + result.message
+            );
+
+            return;
+
+        }
+
+
+        alert(
+            "GRN deleted successfully."
+        );
+
+        loadCurrentUser();
+        loadGRNs();
+
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to delete GRN."
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// CREATE GRN
+// ============================================================
+
+function goCreateGRN() {
+
+    window.location.href =
+        "grn_create.html";
+
+}
+
+
+// ============================================================
+// FORMAT AMOUNT
+// ============================================================
+
+function formatAmount(amount) {
+
+    const number =
+        parseFloat(
+            amount
+        ) || 0;
+
+
+    return number.toFixed(
+        2
+    );
+
+}
+
+
+// ============================================================
+// HTML ESCAPE
+// ============================================================
+
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+function logout() {
+
+    window.location.href =
+        "../logout.php";
+
+}
+
+async function loadCurrentUser() {
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/current_user.php"
+            );
+
+        const result =
+            await response.json();
+
+
+        if (
+            result.success &&
+            result.data
+        ) {
+
+            document.getElementById(
+                "currentUser"
+            ).textContent =
+                result.data.username;
+
+        }
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed to load current user:",
+            error
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// START
+// ============================================================
+loadCurrentUser();
+
+loadGRNs();
+
+
+</script>
+
+
+</body>
+
+</html>

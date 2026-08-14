@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>GRN View</title>
+
+</head>
+
+<body>
+
+<h1>GRN View</h1>
+
+<div id="loading">
+    Loading...
+</div>
+
+
+<div id="grnContent" style="display:none;">
+
+    <h2>GRN Information</h2>
+
+    <p>
+        <strong>GRN ID:</strong>
+        <span id="grnId"></span>
+    </p>
+
+    <p>
+        <strong>GRN Date:</strong>
+        <span id="grnDate"></span>
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        <span id="status"></span>
+    </p>
+
+    <p>
+        <strong>Total Amount:</strong>
+        <span id="totalAmount"></span>
+    </p>
+
+    <p>
+        <strong>Created By:</strong>
+        <span id="createdBy"></span>
+    </p>
+
+    <p>
+        <strong>Created At:</strong>
+        <span id="createdAt"></span>
+    </p>
+
+    <p>
+        <strong>ETD:</strong>
+        <span id="etd"></span>
+    </p>
+
+    <p>
+        <strong>ETA:</strong>
+        <span id="eta"></span>
+    </p>
+
+    <p>
+        <strong>Exchange Rate:</strong>
+        <span id="exchangeRate"></span>
+    </p>
+
+    <p>
+        <strong>Entry:</strong>
+        <span id="entry"></span>
+    </p>
+
+    <p>
+        <strong>Cost Per Entry:</strong>
+        <span id="costPerEntry"></span>
+    </p>
+
+    <p>
+        <strong>Carton Number:</strong>
+        <span id="cartonNumber"></span>
+    </p>
+
+
+    <h2>GRN Items</h2>
+
+    <table border="1">
+
+        <thead>
+
+            <tr>
+
+<th>No.</th>
+<th>Item Code</th>
+<th>Item Name</th>
+<th>QTY</th>
+<th>UOM</th>
+<th>QTY/Carton</th>
+<th>Total QTY</th>
+<th>Unit Price</th>
+<th>Sub Total</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="itemsBody"></tbody>
+
+    </table>
+
+
+    <br>
+
+    <button onclick="goBack()">
+        Back
+    </button>
+
+    <button onclick="editCurrentGRN()">
+        Edit
+    </button>
+
+    <button onclick="exportPackingList()">
+    Export Packing List
+    </button>
+
+</div>
+
+
+<script>
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const grnId =
+    params.get("grn_id");
+
+
+async function loadGRN() {
+
+    if (!grnId) {
+
+        alert("GRN ID is missing.");
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/grn_view.php?grn_id="
+                + encodeURIComponent(grnId)
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            throw new Error(
+                result.message
+            );
+
+        }
+
+
+        const grn =
+            result.grn;
+
+
+        const items =
+            result.items || [];
+
+
+        document.getElementById(
+            "grnId"
+        ).textContent =
+            grn.GRN_ID || "";
+
+
+        document.getElementById(
+            "grnDate"
+        ).textContent =
+            grn.GRN_Date || "";
+
+
+        document.getElementById(
+            "status"
+        ).textContent =
+            grn.Status || "";
+
+
+        document.getElementById(
+            "totalAmount"
+        ).textContent =
+            grn.Total_Amount || "0.00";
+
+
+        document.getElementById(
+            "createdBy"
+        ).textContent =
+            grn.Created_By || "-";
+
+
+        document.getElementById(
+            "createdAt"
+        ).textContent =
+            grn.Created_At || "-";
+
+
+        document.getElementById(
+            "etd"
+        ).textContent =
+            grn.ETD_Date || "-";
+
+
+        document.getElementById(
+            "eta"
+        ).textContent =
+            grn.ETA_Date || "-";
+
+
+        document.getElementById(
+            "exchangeRate"
+        ).textContent =
+            grn.Exchange_Rate || "-";
+
+
+        document.getElementById(
+            "entry"
+        ).textContent =
+            grn.Entry || "-";
+
+
+        document.getElementById(
+            "costPerEntry"
+        ).textContent =
+            grn.Cost_Per_Entry || "0.00";
+
+
+        document.getElementById(
+            "cartonNumber"
+        ).textContent =
+            grn.Carton_Number || "-";
+
+
+        const tbody =
+            document.getElementById(
+                "itemsBody"
+            );
+
+
+        tbody.innerHTML = "";
+
+
+        items.forEach((item, index) => {
+
+    const row =
+        document.createElement(
+            "tr"
+        );
+
+
+    row.innerHTML = `
+
+        <td>${index + 1}</td>
+
+        <td>${escapeHTML(item.Product_ID)}</td>
+
+        <td>${escapeHTML(item.Item_Name)}</td>
+
+        <td>${escapeHTML(item.Quantity)}</td>
+
+        <td>${escapeHTML(item.UOM)}</td>
+
+        <td>${escapeHTML(item.Qty_Per_Carton)}</td>
+
+        <td>${escapeHTML(item.Total_Qty)}</td>
+
+        <td>${escapeHTML(item.Unit_Price_MYR)}</td>
+
+        <td>${escapeHTML(item.Sub_Total)}</td>
+
+    `;
+
+
+    tbody.appendChild(row);
+
+});
+
+        document.getElementById(
+            "loading"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "grnContent"
+        ).style.display =
+            "block";
+
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        document.getElementById(
+            "loading"
+        ).textContent =
+            "Failed to load GRN: "
+            + error.message;
+
+    }
+
+}
+
+
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function goBack() {
+
+    window.location.href =
+        "grn_list.html";
+
+}
+
+
+function editCurrentGRN() {
+
+    window.location.href =
+        "grn_edit.html?grn_id="
+        + encodeURIComponent(grnId);
+
+}
+
+
+loadGRN();
+
+function exportPackingList() {
+
+    alert(
+        "Packing List export will be available soon."
+    );
+
+}
+
+</script>
+
+</body>
+
+</html>

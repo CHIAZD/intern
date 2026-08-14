@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Edit GRN</title>
+
+</head>
+
+<body>
+
+<h1>Edit GRN</h1>
+
+
+<!-- =========================================================
+     GRN INFORMATION
+========================================================= -->
+
+<h2>GRN Information</h2>
+
+
+<div>
+
+    <label>GRN ID</label>
+
+    <input
+        type="text"
+        id="grnId"
+        readonly
+    >
+
+</div>
+
+
+<div>
+
+    <label>GRN Date</label>
+
+    <input
+        type="date"
+        id="grnDate"
+        readonly
+    >
+
+</div>
+
+
+<!-- =========================================================
+     OTHERS
+========================================================= -->
+
+<h2>Others</h2>
+
+
+<div>
+
+    <label>ETD Date</label>
+
+    <input
+        type="date"
+        id="etdDate"
+    >
+
+</div>
+
+
+<div>
+
+    <label>ETA Date</label>
+
+    <input
+        type="date"
+        id="etaDate"
+    >
+
+</div>
+
+
+<div>
+
+    <label>Exchange Rate</label>
+
+    <input
+        type="number"
+        id="exchangeRate"
+        step="0.000001"
+    >
+
+</div>
+
+
+<div>
+
+    <label>Entry</label>
+
+    <input
+        type="text"
+        id="entry"
+    >
+
+</div>
+
+
+<div>
+
+    <label>Cost Per Entry</label>
+
+    <input
+        type="number"
+        id="costPerEntry"
+        step="0.01"
+    >
+
+</div>
+
+
+<div>
+
+    <label>Carton Number</label>
+
+    <input
+        type="text"
+        id="cartonNumber"
+    >
+
+</div>
+
+
+<hr>
+
+
+<!-- =========================================================
+     GRN ITEMS
+========================================================= -->
+
+<h2>GRN Items</h2>
+
+
+<table border="1">
+
+    <thead>
+
+        <tr>
+
+            <th>No.</th>
+
+            <th>Item Code</th>
+
+            <th>Item Name</th>
+
+            <th>QTY</th>
+
+            <th>UOM</th>
+
+            <th>QTY/Carton</th>
+
+            <th>Total QTY</th>
+
+            <th>Unit Price</th>
+
+            <th>Sub Total</th>
+
+        </tr>
+
+    </thead>
+
+
+    <tbody id="grnItemsBody">
+
+    </tbody>
+
+</table>
+
+
+<br>
+
+
+<h3>
+    Total Amount:
+    <span id="totalAmount">0.00</span>
+</h3>
+
+
+<br>
+
+
+<button onclick="saveGRN()">
+    Save Changes
+</button>
+
+
+<button onclick="goBack()">
+    Cancel
+</button>
+
+
+<script>
+let grnData = null;
+let grnItems = [];
+
+
+// ============================================================
+// GET GRN ID FROM URL
+// ============================================================
+
+function getGRNId() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    return params.get("grn_id");
+}
+
+
+// ============================================================
+// LOAD GRN
+// ============================================================
+
+async function loadGRN() {
+
+    const grnId =
+        getGRNId();
+
+
+    if (!grnId) {
+
+        alert(
+            "GRN ID is missing."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/grn_get.php?grn_id="
+                + encodeURIComponent(grnId)
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            alert(
+                "Failed to load GRN: "
+                + result.message
+            );
+
+            return;
+
+        }
+
+
+        grnData =
+            result.grn;
+
+
+        grnItems =
+            result.items;
+
+
+        loadHeader();
+
+        loadItems();
+
+        calculateTotal();
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        alert(
+            "Unable to load GRN."
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// LOAD HEADER
+// ============================================================
+
+function loadHeader() {
+
+    /*
+    ------------------------------------------------------------
+    GRN ID
+    Auto generated
+    READ ONLY
+    ------------------------------------------------------------
+    */
+
+    document.getElementById(
+        "grnId"
+    ).value =
+        grnData.GRN_ID || "";
+
+
+    /*
+    ------------------------------------------------------------
+    GRN Date
+    Auto generated
+    READ ONLY
+    ------------------------------------------------------------
+    */
+
+    document.getElementById(
+        "grnDate"
+    ).value =
+        grnData.GRN_Date || "";
+
+
+    /*
+    ------------------------------------------------------------
+    OTHERS
+    These are editable
+    ------------------------------------------------------------
+    */
+
+    document.getElementById(
+        "etdDate"
+    ).value =
+        grnData.ETD_Date || "";
+
+
+    document.getElementById(
+        "etaDate"
+    ).value =
+        grnData.ETA_Date || "";
+
+
+    document.getElementById(
+        "exchangeRate"
+    ).value =
+        grnData.Exchange_Rate || "";
+
+
+    document.getElementById(
+        "entry"
+    ).value =
+        grnData.Entry || "";
+
+
+    document.getElementById(
+        "costPerEntry"
+    ).value =
+        grnData.Cost_Per_Entry || "";
+
+
+    document.getElementById(
+        "cartonNumber"
+    ).value =
+        grnData.Carton_Number || "";
+
+}
+
+
+// ============================================================
+// LOAD ITEMS
+// ============================================================
+
+function loadItems() {
+
+    const tbody =
+        document.getElementById(
+            "grnItemsBody"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    grnItems.forEach(
+        (item, index) => {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${index + 1}
+                </td>
+
+
+                <td>
+                    ${item.Product_ID || ""}
+                </td>
+
+
+                <td>
+                    ${item.Item_Name || ""}
+                </td>
+
+
+                <td>
+                    ${item.Quantity || 0}
+                </td>
+
+
+                <td>
+                    ${item.UOM || ""}
+                </td>
+
+
+                <td>
+                    ${item.Qty_Per_Carton || 0}
+                </td>
+
+
+                <td>
+                    ${item.Total_Qty || 0}
+                </td>
+
+
+                <td>
+                    ${parseFloat(
+                        item.Unit_Price_MYR || 0
+                    ).toFixed(4)}
+                </td>
+
+
+                <td>
+                    ${parseFloat(
+                        item.Sub_Total || 0
+                    ).toFixed(2)}
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// CALCULATE TOTAL
+// ============================================================
+
+function calculateTotal() {
+
+    let total =
+        0;
+
+
+    grnItems.forEach(
+        item => {
+
+            total +=
+                parseFloat(
+                    item.Sub_Total || 0
+                ) || 0;
+
+        }
+    );
+
+
+    document.getElementById(
+        "totalAmount"
+    ).textContent =
+        total.toFixed(2);
+
+}
+
+
+// ============================================================
+// SAVE GRN
+// ============================================================
+
+async function saveGRN() {
+
+    if (!grnData) {
+
+        alert(
+            "GRN data is not loaded."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ------------------------------------------------------------
+    ONLY SEND EDITABLE FIELDS
+    ------------------------------------------------------------
+    */
+
+    const data = {
+
+        GRN_ID:
+            grnData.GRN_ID,
+
+        ETD_Date:
+            document.getElementById(
+                "etdDate"
+            ).value || null,
+
+        ETA_Date:
+            document.getElementById(
+                "etaDate"
+            ).value || null,
+
+        Exchange_Rate:
+            document.getElementById(
+                "exchangeRate"
+            ).value || null,
+
+        Entry:
+            document.getElementById(
+                "entry"
+            ).value.trim() || null,
+
+        Cost_Per_Entry:
+            document.getElementById(
+                "costPerEntry"
+            ).value || null,
+
+        Carton_Number:
+            document.getElementById(
+                "cartonNumber"
+            ).value.trim() || null
+
+    };
+
+
+    /*
+    ------------------------------------------------------------
+    SEND TO PHP
+    ------------------------------------------------------------
+    */
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/grn_update.php",
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify(data)
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (result.success) {
+
+            alert(
+                "GRN updated successfully."
+            );
+
+
+            window.location.href =
+                "grn_view.html?grn_id="
+                + encodeURIComponent(
+                    grnData.GRN_ID
+                );
+
+
+        } else {
+
+            alert(
+                "Failed to update GRN: "
+                + result.message
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        alert(
+            "Unable to connect to server."
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// CANCEL
+// ============================================================
+
+function goBack() {
+
+    window.history.back();
+
+}
+
+
+// ============================================================
+// START
+// ============================================================
+
+loadGRN();
+
+</script>
+
+</body>
+
+</html>

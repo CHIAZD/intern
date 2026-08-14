@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>GRN Stock Issue</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .toolbar input {
+            padding: 8px 12px;
+            width: 280px;
+        }
+
+        button {
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        .table-container {
+            background: white;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        tr:hover {
+            background: #f8f8f8;
+        }
+
+        .shortage {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .complete {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 30px;
+            color: #721c24;
+            background: #f8d7da;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<h1>GRN Stock Issue</h1>
+
+
+<div class="toolbar">
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search PO ID / Product ID..."
+        oninput="filterIssues()"
+    >
+
+    <button onclick="loadStockIssues()">
+        Refresh
+    </button>
+
+</div>
+
+
+<div class="table-container">
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>PO ID</th>
+
+                <th>Product ID</th>
+
+                <th>Item Name</th>
+
+                <th>PO Qty</th>
+
+                <th>Received Qty</th>
+
+                <th>Shortage Qty</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="issueTableBody">
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="loading"
+                >
+                    Loading...
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<script>
+
+
+// ============================================================
+// GLOBAL
+// ============================================================
+
+let stockIssues = [];
+
+
+// ============================================================
+// LOAD DATA
+// ============================================================
+
+async function loadStockIssues() {
+
+    const tbody =
+        document.getElementById(
+            "issueTableBody"
+        );
+
+
+    tbody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="6"
+                class="loading"
+            >
+                Loading...
+            </td>
+
+        </tr>
+
+    `;
+
+
+    try {
+
+        /*
+         * Load PO list
+         */
+
+        const poResponse =
+            await fetch(
+                "../api/po_list.php"
+            );
+
+
+        const poResult =
+            await poResponse.json();
+
+
+        if (!poResult.success) {
+
+            throw new Error(
+                poResult.message ||
+                "Failed to load PO."
+            );
+
+        }
+
+
+        /*
+         * Load GRN list
+         */
+
+        const grnResponse =
+            await fetch(
+                "../api/grn_list.php"
+            );
+
+
+        const grnResult =
+            await grnResponse.json();
+
+
+        if (!grnResult.success) {
+
+            throw new Error(
+                grnResult.message ||
+                "Failed to load GRN."
+            );
+
+        }
+
+
+        /*
+         * Get detailed data
+         */
+
+        const poList =
+            poResult.data || [];
+
+
+        const grnList =
+            grnResult.data || [];
+
+
+        stockIssues = [];
+
+
+        /*
+         * We need PO item details.
+         *
+         * Each PO is loaded individually.
+         */
+
+        for (
+            const po of poList
+        ) {
+
+            const poId =
+                po.PO_ID;
+
+
+            const poResponse =
+                await fetch(
+                    "../api/po_view.php?po_id=" +
+                    encodeURIComponent(
+                        poId
+                    )
+                );
+
+
+            const poDetail =
+                await poResponse.json();
+
+
+            if (
+                !poDetail.success ||
+                !poDetail.data
+            ) {
+
+                continue;
+
+            }
+
+
+            const poItems =
+                poDetail.data.items || [];
+
+
+            /*
+             * Find GRNs belonging to this PO
+             */
+
+            const relatedGRNs =
+                grnList.filter(
+                    function (grn) {
+
+                        return (
+                            grn.PO_ID ===
+                            poId
+                        );
+
+                    }
+                );
+
+
+            /*
+             * Calculate each PO item
+             */
+
+            for (
+                const poItem of poItems
+            ) {
+
+                const poItemId =
+                    poItem.PO_Item_ID;
+
+
+                const productId =
+                    poItem.Product_ID;
+
+
+                const itemName =
+                    poItem.Item_Name ||
+                    "";
+
+
+                const poQty =
+                    parseInt(
+                        poItem.Quantity
+                    ) || 0;
+
+
+                let receivedQty =
+                    0;
+
+
+                /*
+                 * Find all GRNs for this
+                 * PO item.
+                 *
+                 * We use Quantity only.
+                 *
+                 * Total_Qty is NOT used.
+                 */
+
+                for (
+                    const grn of relatedGRNs
+                ) {
+
+                    /*
+                     * GRN list normally only
+                     * contains header data.
+                     *
+                     * Therefore load the
+                     * GRN detail.
+                     */
+
+                    const grnResponse =
+                        await fetch(
+                            "../api/grn_view.php?grn_id=" +
+                            encodeURIComponent(
+                                grn.GRN_ID
+                            )
+                        );
+
+
+                    const grnDetail =
+                        await grnResponse.json();
+
+
+                    if (
+                        !grnDetail.success ||
+                        !grnDetail.data
+                    ) {
+
+                        continue;
+
+                    }
+
+
+                    const grnItems =
+                        grnDetail.data.items ||
+                        [];
+
+
+                    grnItems.forEach(
+                        function (grnItem) {
+
+                            /*
+                             * Match by PO_Item_ID
+                             */
+
+                            if (
+                                Number(
+                                    grnItem.PO_Item_ID
+                                ) ===
+                                Number(
+                                    poItemId
+                                )
+                            ) {
+
+                                receivedQty +=
+                                    parseInt(
+                                        grnItem.Quantity
+                                    ) || 0;
+
+                            }
+
+                        }
+                    );
+
+                }
+
+
+                const shortageQty =
+                    poQty -
+                    receivedQty;
+
+
+                /*
+                 * Only display items
+                 * which have shortage.
+                 */
+
+                if (
+                    shortageQty > 0 &&
+                    receivedQty > 0
+                ) {
+
+                        stockIssues.push({
+
+                        po_id:
+                            poId,
+
+                        product_id:
+                            productId,
+
+                        item_name:
+                            itemName,
+
+                        po_qty:
+                            poQty,
+
+                        received_qty:
+                            receivedQty,
+
+                        shortage_qty:
+                            shortageQty
+
+                    });
+
+                }
+
+            }
+
+        }
+
+
+        displayIssues(
+            stockIssues
+        );
+
+
+    }
+    catch (error) {
+
+        console.error(
+            "Failed to load stock issues:",
+            error
+        );
+
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="error"
+                >
+                    Failed to load stock issue data.
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+
+// ============================================================
+// DISPLAY
+// ============================================================
+
+function displayIssues(data) {
+
+    const tbody =
+        document.getElementById(
+            "issueTableBody"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    if (
+        !data ||
+        data.length === 0
+    ) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="empty"
+                >
+                    No stock issue found.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    data.forEach(
+        function (issue) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHTML(
+                        issue.po_id
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        issue.product_id
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        issue.item_name
+                    )}
+                </td>
+
+                <td>
+                    ${issue.po_qty}
+                </td>
+
+                <td>
+                    ${issue.received_qty}
+                </td>
+
+                <td class="shortage">
+                    ${issue.shortage_qty}
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// SEARCH
+// ============================================================
+
+function filterIssues() {
+
+    const keyword =
+        document.getElementById(
+            "searchInput"
+        ).value
+        .trim()
+        .toLowerCase();
+
+
+    if (!keyword) {
+
+        displayIssues(
+            stockIssues
+        );
+
+        return;
+
+    }
+
+
+    const filtered =
+        stockIssues.filter(
+            function (issue) {
+
+                return (
+
+                    (
+                        issue.po_id ||
+                        ""
+                    )
+                    .toLowerCase()
+                    .includes(
+                        keyword
+                    )
+
+                    ||
+
+                    (
+                        issue.product_id ||
+                        ""
+                    )
+                    .toLowerCase()
+                    .includes(
+                        keyword
+                    )
+
+                    ||
+
+                    (
+                        issue.item_name ||
+                        ""
+                    )
+                    .toLowerCase()
+                    .includes(
+                        keyword
+                    )
+
+                );
+
+            }
+        );
+
+
+    displayIssues(
+        filtered
+    );
+
+}
+
+
+// ============================================================
+// ESCAPE HTML
+// ============================================================
+
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// ============================================================
+// START
+// ============================================================
+
+loadStockIssues();
+
+
+</script>
+
+
+</body>
+
+</html>

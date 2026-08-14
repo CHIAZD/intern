@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Purchase Order</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        table input,
+        table select {
+            width: 100%;
+        }
+
+        button {
+            padding: 9px 16px;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .add-btn {
+            background: #2d7d46;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #c0392b;
+            color: white;
+        }
+
+        .save-btn {
+            background: #1769aa;
+            color: white;
+            font-size: 16px;
+            padding: 12px 25px;
+        }
+
+        .total-box {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            color: #555;
+        }
+
+        /* =========================================================
+   Item Select Checkbox
+========================================================= */
+
+.item-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 18px;
+    height: 18px;
+
+    border: 2px solid #777;
+    border-radius: 50%;
+
+    background: white;
+
+    cursor: pointer;
+
+    padding: 0;
+    margin: 0;
+
+    vertical-align: middle;
+}
+
+
+/* Selected */
+
+.item-checkbox:checked {
+    background: #1769aa;
+
+    border-color: #1769aa;
+
+    box-shadow:
+        inset 0 0 0 4px white;
+}
+
+.others-btn {
+    background: #555;
+    color: white;
+    padding: 9px 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.po-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+.tab-btn {
+    background: #eee;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-right: 0;
+}
+
+.tab-btn.active {
+    background: #1769aa;
+    color: white;
+    border-color: #1769aa;
+}
+
+.tab-content {
+    width: 100%;
+}
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <h1>Create Purchase Order</h1>
+
+
+    <!-- =========================================================
+         PO INFORMATION
+    ========================================================== -->
+
+    <div class="section">
+
+        <h2>PO Information</h2>
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label>PO Number</label>
+
+                <input
+                    type="text"
+                    id="poId"
+                    value="Loading..."
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>PO Date</label>
+
+                <input
+                    type="date"
+                    id="poDate"
+                    readonly
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label>Supplier / Vendor</label>
+
+                <select id="vendorSelect">
+
+                    <option value="">
+                        -- Select Vendor --
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Ref No</label>
+
+                <input
+                    type="text"
+                    id="refNo"
+                    placeholder="Enter reference number"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label>Currency</label>
+
+            <select id="currency">
+                <option value="">Loading...</option>
+            </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Description</label>
+
+            <textarea
+                id="description"
+                rows="3"
+                placeholder="Enter description"
+            ></textarea>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Photo</label>
+
+            <input
+                    type="file"
+                    id="photo"
+                    accept="image/jpeg,image/png,image/webp"
+            >
+
+            <small>
+                    JPG, PNG or WEBP. Maximum 5 MB.
+            </small>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================================
+     PO ITEMS / OTHERS
+========================================================== -->
+
+<div class="section">
+
+    <!-- Tabs -->
+
+    <div class="po-tabs">
+
+        <button
+            type="button"
+            class="tab-btn active"
+            id="poItemsTab"
+            onclick="showPOItems()"
+        >
+            PO Items
+        </button>
+
+        <button
+            type="button"
+            class="tab-btn"
+            id="othersTab"
+            onclick="showOthers()"
+        >
+            Others
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         PO ITEMS CONTENT
+    ====================================================== -->
+
+    <div
+        id="poItemsContent"
+        class="tab-content"
+    >
+
+        <button
+            type="button"
+            class="add-btn"
+            onclick="addItem()"
+        >
+            + Add Item
+        </button>
+
+
+        <button
+            type="button"
+            class="delete-btn"
+            onclick="deleteSelectedItems()"
+        >
+            Delete Selected
+        </button>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        <input
+                            type="checkbox"
+                            id="selectAllItems"
+                            onchange="toggleSelectAllItems()"
+                        >
+                    </th>
+
+                    <th>No.</th>
+
+                    <th>Item Code</th>
+
+                    <th>Item Name</th>
+
+                    <th>Quantity</th>
+
+                    <th>UOM</th>
+
+                    <th>Unit Price</th>
+
+                    <th>Sub Total</th>
+
+                    <th>Stock Qty</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="itemsBody">
+            </tbody>
+
+        </table>
+
+
+        <div class="total-box">
+
+            <div>
+                Total Qty:
+                <span id="totalQty">0</span>
+            </div>
+
+            <div>
+                Total Amount:
+                <span id="totalAmount">
+                    RM 0.00
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         OTHERS CONTENT
+    ====================================================== -->
+
+    <div
+        id="othersContent"
+        class="tab-content"
+        style="display: none;"
+    >
+
+        <div class="form-row">
+
+            <!-- Created By -->
+
+            <div class="form-group">
+
+                <label>Created By</label>
+
+                <input
+                    type="text"
+                    id="createdBy"
+                    readonly
+                    placeholder="Current User"
+                >
+
+            </div>
+
+
+            <!-- Prepared Date -->
+
+            <div class="form-group">
+
+                <label>Prepared Date</label>
+
+                <input
+                    type="date"
+                    id="preparedDate"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+    <!-- =========================================================
+         SAVE
+    ========================================================== -->
+
+    <div class="section">
+
+        <button
+            type="button"
+            class="save-btn"
+            id="saveButton"
+            onclick="savePO()"
+        >
+            Save PO
+        </button>
+
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+    </div>
+
+
+
+<script>
+
+/*
+|--------------------------------------------------------------------------
+| Global Data
+|--------------------------------------------------------------------------
+*/
+
+let products = [];
+let vendors = [];
+
+
+/*
+|--------------------------------------------------------------------------
+| Page Initialize
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    setPODate();
+
+    loadNextPOId();
+
+    loadVendors();
+
+    loadProducts();
+    
+    loadPOOptions();
+    
+    loadCurrentUser();
+
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Set PO Date
+|--------------------------------------------------------------------------
+*/
+
+function setPODate() {
+
+    const today = new Date();
+
+    const year =
+        today.getFullYear();
+
+    const month =
+        String(today.getMonth() + 1)
+            .padStart(2, "0");
+
+    const day =
+        String(today.getDate())
+            .padStart(2, "0");
+
+    document.getElementById("poDate").value =
+        `${year}-${month}-${day}`;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Load Vendors
+|--------------------------------------------------------------------------
+*/
+
+async function loadVendors() {
+
+    try {
+
+        const response =
+            await fetch("../api/vendors.php");
+
+        const result =
+            await response.json();
+
+        if (!result.success) {
+
+            showMessage(
+                result.message,
+                false
+            );
+
+            return;
+        }
+
+        vendors = result.data;
+
+        const select =
+            document.getElementById(
+                "vendorSelect"
+            );
+
+        vendors.forEach(function (vendor) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                vendor.Vendor_ID;
+
+            option.textContent =
+                vendor.Vendor_ID +
+                " - " +
+                vendor.Vendor_CompanyName;
+
+            select.appendChild(option);
+
+        });
+
+    } catch (error) {
+
+    console.error(
+        "Failed to load vendors:",
+        error
+    );
+
+}
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Load Products
+|--------------------------------------------------------------------------
+*/
+
+async function loadProducts() {
+
+    try {
+
+        const response =
+            await fetch("../api/products.php");
+
+        const result =
+            await response.json();
+
+        if (!result.success) {
+
+            showMessage(
+                result.message,
+                false
+            );
+
+            return;
+        }
+
+        products = result.data;
+
+        const datalist =
+    document.getElementById(
+        "productCodeList"
+    );
+
+datalist.innerHTML = "";
+
+products.forEach(function (product) {
+
+    const option =
+        document.createElement("option");
+
+    option.value =
+        product.Product_ID;
+
+    datalist.appendChild(option);
+
+});
+
+    } catch (error) {
+
+    console.error(
+        "Failed to load products:",
+        error
+    );
+
+}
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Add PO Item
+|--------------------------------------------------------------------------
+*/
+
+function addItem() {
+
+    if (products.length === 0) {
+
+        alert(
+            "No products available. Please add products to the database first."
+        );
+
+        return;
+    }
+
+        if (
+        !window.uomOptions ||
+        window.uomOptions.length === 0
+    ) {
+
+        alert(
+            "UOM options are still loading. Please try again."
+        );
+
+        return;
+    }
+
+    const tbody =
+        document.getElementById(
+            "itemsBody"
+        );
+
+    const row =
+        document.createElement("tr");
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Item Number
+    |--------------------------------------------------------------------------
+    */
+
+    const numberCell =
+        document.createElement("td");
+
+    /*
+|--------------------------------------------------------------------------
+| Select Checkbox
+|--------------------------------------------------------------------------
+*/
+
+const selectCell =
+    document.createElement("td");
+
+const checkbox =
+    document.createElement("input");
+
+checkbox.type = "checkbox";
+
+checkbox.className =
+    "item-checkbox";
+
+selectCell.appendChild(
+    checkbox
+);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Product
+    |--------------------------------------------------------------------------
+    */
+
+const productInput =
+    document.createElement("input");
+
+productInput.type =
+    "text";
+
+productInput.placeholder =
+    "Enter or select Item Code";
+
+productInput.setAttribute(
+    "list",
+    "productCodeList"
+);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Item Name
+    |--------------------------------------------------------------------------
+    */
+
+    const itemName =
+        document.createElement("input");
+
+    itemName.type =
+        "text";
+
+    itemName.readOnly =
+        true;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quantity
+    |--------------------------------------------------------------------------
+    */
+
+    const quantity =
+        document.createElement("input");
+
+    quantity.type =
+        "number";
+
+    quantity.min =
+        "1";
+
+    quantity.step =
+        "1";
+
+    quantity.value =
+        "1";
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | UOM
+    |--------------------------------------------------------------------------
+    */
+
+    const uom =
+        document.createElement("select");
+
+
+    const uomList =
+        window.uomOptions || [];
+
+    uomList.forEach(function (value) {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            value;
+
+        option.textContent =
+            value;
+
+        if (value === "PCS") {
+
+            option.selected =
+                true;
+
+        }
+
+        uom.appendChild(option);
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Unit Price
+    |--------------------------------------------------------------------------
+    */
+
+    const unitPrice =
+        document.createElement("input");
+
+    unitPrice.type =
+        "number";
+
+    unitPrice.min =
+        "0";
+
+    unitPrice.step =
+        "0.01";
+
+    unitPrice.value =
+        "0.00";
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sub Total
+    |--------------------------------------------------------------------------
+    */
+
+    const subTotal =
+        document.createElement("input");
+
+    subTotal.type =
+        "text";
+
+    subTotal.value =
+        "0.00";
+
+    subTotal.readOnly =
+        true;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Qty
+    |--------------------------------------------------------------------------
+    */
+
+    const stockQty =
+        document.createElement("input");
+
+    stockQty.type =
+        "number";
+
+    stockQty.min =
+        "0";
+
+    stockQty.step =
+        "1";
+
+    stockQty.value =
+        "0";
+
+    
+
+    /*
+    |--------------------------------------------------------------------------
+    | Product Change
+    |--------------------------------------------------------------------------
+    */
+
+    productInput.addEventListener(
+    "input",
+    function () {
+
+        const product =
+            products.find(
+                function (p) {
+
+                    return p.Product_ID ===
+                        productInput.value.trim();
+
+                }
+            );
+
+
+        if (product) {
+
+            itemName.value =
+                product.Product_Description;
+
+        } else {
+
+            itemName.value =
+                "";
+
+        }
+
+    }
+);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Calculate Subtotal
+    |--------------------------------------------------------------------------
+    */
+
+    function calculateSubtotal() {
+
+        const qty =
+            parseInt(
+                quantity.value
+            ) || 0;
+
+        const price =
+            parseFloat(
+                unitPrice.value
+            ) || 0;
+
+        const subtotal =
+            qty * price;
+
+        subTotal.value =
+            subtotal.toFixed(2);
+
+        calculateTotals();
+
+    }
+
+
+    quantity.addEventListener(
+        "input",
+        calculateSubtotal
+    );
+
+
+    unitPrice.addEventListener(
+        "input",
+        calculateSubtotal
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create Cells
+    |--------------------------------------------------------------------------
+    */
+
+const productCell =
+    document.createElement("td");
+
+productCell.appendChild(
+    productInput
+);
+
+
+    const itemNameCell =
+        document.createElement("td");
+
+    itemNameCell.appendChild(
+        itemName
+    );
+
+
+    const quantityCell =
+        document.createElement("td");
+
+    quantityCell.appendChild(
+        quantity
+    );
+
+
+    const uomCell =
+        document.createElement("td");
+
+    uomCell.appendChild(
+        uom
+    );
+
+
+    const priceCell =
+        document.createElement("td");
+
+    priceCell.appendChild(
+        unitPrice
+    );
+
+
+    const subtotalCell =
+        document.createElement("td");
+
+    subtotalCell.appendChild(
+        subTotal
+    );
+
+
+    const stockCell =
+        document.createElement("td");
+
+    stockCell.appendChild(
+        stockQty
+    );
+
+    row.appendChild(
+        selectCell
+    );
+
+    row.appendChild(
+        numberCell
+    );
+
+    row.appendChild(
+        productCell
+    );
+
+    row.appendChild(
+        itemNameCell
+    );
+
+    row.appendChild(
+        quantityCell
+    );
+
+    row.appendChild(
+        uomCell
+    );
+
+    row.appendChild(
+        priceCell
+    );
+
+    row.appendChild(
+        subtotalCell
+    );
+
+    row.appendChild(
+        stockCell
+    );
+
+    tbody.appendChild(
+        row
+    );
+
+
+    updateItemNumbers();
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Update Item Numbers
+|--------------------------------------------------------------------------
+*/
+
+function updateItemNumbers() {
+
+    const rows =
+        document.querySelectorAll(
+            "#itemsBody tr"
+        );
+
+
+    rows.forEach(
+        function (row, index) {
+
+            row.children[1].textContent =
+                index + 1;
+
+        }
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Calculate Totals
+|--------------------------------------------------------------------------
+*/
+
+function calculateTotals() {
+
+    let totalQty =
+        0;
+
+    let totalAmount =
+        0;
+
+
+    const rows =
+        document.querySelectorAll(
+            "#itemsBody tr"
+        );
+
+
+    rows.forEach(
+        function (row) {
+
+            const inputs =
+                row.querySelectorAll(
+                    "input"
+                );
+
+
+            if (inputs.length < 5) {
+
+                return;
+
+            }
+
+
+            /*
+            inputs:
+
+            0 = Item Name
+            1 = Quantity
+            2 = Unit Price
+            3 = Sub Total
+            4 = Stock Qty
+            */
+
+
+const quantity =
+    parseInt(
+        inputs[2].value
+    ) || 0;
+
+
+
+            const subtotal =
+                parseFloat(
+                    inputs[4].value
+                ) || 0;
+
+
+            totalQty +=
+                quantity;
+
+
+            totalAmount +=
+                subtotal;
+
+        }
+    );
+
+
+    document.getElementById(
+        "totalQty"
+    ).textContent =
+        totalQty;
+
+
+    const currency =
+        document.getElementById(
+            "currency"
+        ).value;
+
+
+    document.getElementById(
+        "totalAmount"
+    ).textContent =
+        currency +
+        " " +
+        totalAmount.toFixed(2);
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Currency Change
+|--------------------------------------------------------------------------
+*/
+
+document.getElementById(
+    "currency"
+).addEventListener(
+    "change",
+    calculateTotals
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Collect Items
+|--------------------------------------------------------------------------
+*/
+
+function collectItems() {
+
+    const rows =
+        document.querySelectorAll(
+            "#itemsBody tr"
+        );
+
+    const items = [];
+
+
+    rows.forEach(function (row) {
+
+        const inputs =
+            row.querySelectorAll(
+                "input"
+            );
+
+        const selects =
+            row.querySelectorAll(
+                "select"
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Current Input Order
+        |--------------------------------------------------------------------------
+        |
+        | inputs[0] = Checkbox
+        | inputs[1] = Item Code
+        | inputs[2] = Item Name
+        | inputs[3] = Quantity
+        | inputs[4] = Unit Price
+        | inputs[5] = Sub Total
+        | inputs[6] = Stock Qty
+        |
+        */
+
+
+        const productId =
+            inputs[1].value.trim();
+
+
+        const itemName =
+            inputs[2].value.trim();
+
+
+        const quantity =
+            parseInt(
+                inputs[3].value
+            );
+
+
+        const unitPrice =
+            parseFloat(
+                inputs[4].value
+            );
+
+
+        const subTotal =
+            parseFloat(
+                inputs[5].value
+            );
+
+
+        const stockQty =
+            parseInt(
+                inputs[6].value
+            ) || 0;
+
+
+        const uom =
+            selects[0].value;
+
+
+        items.push({
+
+            product_id:
+                productId,
+
+            item_name:
+                itemName,
+
+            quantity:
+                quantity,
+
+            uom:
+                uom,
+
+            unit_price:
+                unitPrice,
+
+            sub_total:
+                subTotal,
+
+            stock_qty:
+                stockQty
+
+        });
+
+    });
+
+
+    return items;
+
+}
+/*
+|--------------------------------------------------------------------------
+| Save PO
+|--------------------------------------------------------------------------
+*/
+
+async function savePO() {
+
+    clearMessage();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Vendor
+    |--------------------------------------------------------------------------
+    */
+
+    const vendorId =
+        document.getElementById(
+            "vendorSelect"
+        ).value;
+
+
+    if (!vendorId) {
+
+        showMessage(
+            "Please select a Vendor.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Items
+    |--------------------------------------------------------------------------
+    */
+
+    const rows =
+        document.querySelectorAll(
+            "#itemsBody tr"
+        );
+
+
+    if (rows.length === 0) {
+
+        showMessage(
+            "Please add at least one item.",
+            false
+        );
+
+        return;
+
+    }
+
+
+/*
+|--------------------------------------------------------------------------
+| Validate Items
+|--------------------------------------------------------------------------
+*/
+
+const items =
+    collectItems();
+
+
+for (
+    let i = 0;
+    i < items.length;
+    i++
+) {
+
+    const item =
+        items[i];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check Item Code Empty
+    |--------------------------------------------------------------------------
+    */
+
+    if (!item.product_id) {
+
+        alert(
+            `Please enter Item Code for Item ${i + 1}.`
+        );
+
+        return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check Item Code Exists
+    |--------------------------------------------------------------------------
+    */
+
+    const productExists =
+        products.some(function (product) {
+
+            return product.Product_ID.trim() ===
+                item.product_id;
+
+        });
+
+
+    if (!productExists) {
+
+        alert(
+            `Item Code "${item.product_id}" does not exist.\n\n` +
+            `Please add this product first.`
+        );
+
+        return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check Quantity
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        !Number.isInteger(
+            item.quantity
+        ) ||
+        item.quantity <= 0
+    ) {
+
+        alert(
+            `Quantity for Item ${i + 1} must be a positive integer.`
+        );
+
+        return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check Unit Price
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        isNaN(item.unit_price) ||
+        item.unit_price < 0
+    ) {
+
+        alert(
+            `Unit Price for Item ${i + 1} is invalid.`
+        );
+
+        return;
+
+    }
+
+}
+
+    /*
+    |--------------------------------------------------------------------------
+    | Prepare Data
+    |--------------------------------------------------------------------------
+    */
+const data = {
+
+    po_id:
+        document.getElementById("poId").value.trim(),
+
+    vendor_id:
+        vendorId,
+
+    ref_no:
+        document.getElementById("refNo").value.trim(),
+
+    description:
+        document.getElementById("description").value.trim(),
+
+    currency:
+        document.getElementById("currency").value,
+
+    prepared_date:
+        document.getElementById("preparedDate").value || null,
+
+    created_by:
+        document.getElementById("createdBy").value.trim(),
+
+    photo_path:
+        null,
+
+    items:
+        items
+};
+
+console.log("PO DATA BEFORE SAVE:", data);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Disable Save Button
+    |--------------------------------------------------------------------------
+    */
+
+    const saveButton =
+        document.getElementById(
+            "saveButton"
+        );
+
+
+    saveButton.disabled =
+        true;
+
+
+    saveButton.textContent =
+        "Saving...";
+
+
+    try {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 1 - Create PO
+        |--------------------------------------------------------------------------
+        */
+
+        const response =
+            await fetch(
+                "../api/po.php",
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify(
+                            data
+                        )
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            throw new Error(
+                result.message
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PO Created Successfully
+        |--------------------------------------------------------------------------
+        */
+
+        const createdPOId =
+            result.data.po_id;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Step 2 - Upload Photo
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            await uploadPOPhoto(
+                createdPOId
+            );
+
+        } catch (photoError) {
+
+            console.error(
+                "Photo upload failed:",
+                photoError
+            );
+
+
+            alert(
+                "PO created successfully,\n\n" +
+                "but photo upload failed.\n\n" +
+                photoError.message
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Stop here so we can see the problem
+            |--------------------------------------------------------------------------
+            */
+
+            return;
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Everything Successful
+        |--------------------------------------------------------------------------
+        */
+
+        alert(
+            "PO created successfully!"
+        );
+
+
+        window.location.href =
+            "po_view.html?po_id=" +
+            encodeURIComponent(
+                createdPOId
+            );
+
+
+    } catch (error) {
+
+        console.error(
+            "Save PO Error:",
+            error
+        );
+
+
+        showMessage(
+            "Failed to create PO: " +
+            error.message,
+            false
+        );
+
+    } finally {
+
+        saveButton.disabled =
+            false;
+
+        saveButton.textContent =
+            "Save PO";
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Upload PO Photo
+|--------------------------------------------------------------------------
+*/
+
+async function uploadPOPhoto(poId) {
+
+    console.log("UPLOAD PHOTO FUNCTION STARTED");
+
+    console.log("PO ID:", poId);
+
+    const photoInput =
+        document.getElementById(
+            "photo"
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | No Photo
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        !photoInput ||
+        photoInput.files.length === 0
+    ) {
+
+        /*
+        No photo is allowed.
+        */
+
+        return true;
+
+    }
+
+
+    const photo =
+        photoInput.files[0];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check File Size
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        photo.size >
+        5 * 1024 * 1024
+    ) {
+
+        throw new Error(
+            "Photo must be smaller than 5 MB."
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create FormData
+    |--------------------------------------------------------------------------
+    */
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "po_id",
+        poId
+    );
+
+
+    formData.append(
+        "photo",
+        photo
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Send Photo
+    |--------------------------------------------------------------------------
+    */
+
+    const response =
+        await fetch(
+            "../api/po_upload.php",
+            {
+
+                method:
+                    "POST",
+
+                body:
+                    formData
+
+            }
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Read Server Response
+    |--------------------------------------------------------------------------
+    */
+
+    const responseText =
+        await response.text();
+
+
+    console.log(
+        "Photo Upload HTTP Status:",
+        response.status
+    );
+
+
+    console.log(
+        "Photo Upload Response:",
+        responseText
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Convert JSON
+    |--------------------------------------------------------------------------
+    */
+
+    let result;
+
+
+    try {
+
+        result =
+            JSON.parse(
+                responseText
+            );
+
+    } catch (error) {
+
+        throw new Error(
+            "Server returned invalid response:\n\n" +
+            responseText
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check Result
+    |--------------------------------------------------------------------------
+    */
+
+    if (!response.ok) {
+
+        throw new Error(
+            result.message ||
+            "Photo upload failed."
+        );
+
+    }
+
+
+    if (!result.success) {
+
+        throw new Error(
+            result.message
+        );
+
+    }
+
+
+    return true;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Message
+|--------------------------------------------------------------------------
+*/
+
+function showMessage(
+    message,
+    success
+) {
+
+    const element =
+        document.getElementById(
+            "message"
+        );
+
+
+    element.textContent =
+        message;
+
+
+    element.className =
+        "message " +
+        (
+            success
+                ? "success"
+                : "error"
+        );
+
+
+    element.style.display =
+        "block";
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Clear Message
+|--------------------------------------------------------------------------
+*/
+
+function clearMessage() {
+
+    const element =
+        document.getElementById(
+            "message"
+        );
+
+
+    element.style.display =
+        "none";
+
+}
+
+async function loadNextPOId() {
+    try {
+        const response = await fetch("../api/po_next_id.php");
+
+        const result = await response.json();
+
+        if (!result.success) {
+            document.getElementById("poId").value = "Unable to generate";
+            console.error(result.message);
+            return;
+        }
+
+        document.getElementById("poId").value = result.po_id;
+
+    } catch (error) {
+
+        console.error("Failed to load next PO ID:", error);
+
+        document.getElementById("poId").value = "Unable to generate";
+    }
+}
+
+async function loadPOOptions() {
+
+    try {
+
+        const response =
+            await fetch("../config/po_options.json");
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load PO options."
+            );
+
+        }
+
+        const options =
+            await response.json();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load Currency
+        |--------------------------------------------------------------------------
+        */
+
+        const currencySelect =
+            document.getElementById(
+                "currency"
+            );
+
+        currencySelect.innerHTML = "";
+
+
+        options.currency.forEach(
+            function (currency) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    currency;
+
+                option.textContent =
+                    currency;
+
+                if (currency === "RM") {
+
+                    option.selected =
+                        true;
+
+                }
+
+                currencySelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Save UOM Options
+        |--------------------------------------------------------------------------
+        */
+
+        window.uomOptions =
+            options.uom;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Recalculate Total
+        |--------------------------------------------------------------------------
+        */
+
+        calculateTotals();
+
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load PO options:",
+            error
+        );
+
+        showMessage(
+            "Failed to load UOM / Currency settings.",
+            false
+        );
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Delete Selected Items
+|--------------------------------------------------------------------------
+*/
+
+function deleteSelectedItems() {
+
+    const selected =
+        document.querySelectorAll(
+            ".item-checkbox:checked"
+        );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nothing Selected
+    |--------------------------------------------------------------------------
+    */
+
+    if (selected.length === 0) {
+
+        alert(
+            "Please select at least one item to delete."
+        );
+
+        return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Confirm Delete
+    |--------------------------------------------------------------------------
+    */
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete " +
+            selected.length +
+            " selected item(s)?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Rows
+    |--------------------------------------------------------------------------
+    */
+
+    selected.forEach(
+        function (checkbox) {
+
+            const row =
+                checkbox.closest("tr");
+
+            if (row) {
+
+                row.remove();
+
+            }
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update
+    |--------------------------------------------------------------------------
+    */
+
+    updateItemNumbers();
+
+    calculateTotals();
+}
+
+
+
+async function loadCurrentUser() {
+
+    try {
+
+        const response =
+            await fetch("../api/current_user.php");
+
+        const result =
+            await response.json();
+
+
+
+
+        if (!result.success) {
+
+            alert(result.message);
+
+            return;
+
+        }
+
+
+        document.getElementById(
+            "createdBy"
+        ).value =
+            result.username;
+
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load current user:",
+            error
+        );
+
+        alert(
+            "Failed to load current user."
+        );
+
+    }
+
+}
+/*
+|--------------------------------------------------------------------------
+| Show PO Items
+|--------------------------------------------------------------------------
+*/
+
+function showPOItems() {
+
+    document.getElementById(
+        "poItemsContent"
+    ).style.display = "block";
+
+
+    document.getElementById(
+        "othersContent"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "poItemsTab"
+    ).classList.add("active");
+
+
+    document.getElementById(
+        "othersTab"
+    ).classList.remove("active");
+
+}
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Show Others
+|--------------------------------------------------------------------------
+*/
+
+function showOthers() {
+
+    document.getElementById(
+        "poItemsContent"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "othersContent"
+    ).style.display = "block";
+
+
+    document.getElementById(
+        "poItemsTab"
+    ).classList.remove("active");
+
+
+    document.getElementById(
+        "othersTab"
+    ).classList.add("active");
+
+
+    loadCurrentUser();
+
+}
+
+</script>
+
+<datalist id="productCodeList"></datalist>
+</body>
+
+</html>

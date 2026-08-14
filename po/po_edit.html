@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Edit Purchase Order</title>
+
+
+    <style>
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            margin: 30px;
+
+            background: #f5f5f5;
+
+        }
+
+
+        h1 {
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .section {
+
+            background: white;
+
+            padding: 20px;
+
+            margin-bottom: 20px;
+
+            border: 1px solid #ddd;
+
+        }
+
+
+        .form-row {
+
+            display: flex;
+
+            gap: 20px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .form-group {
+
+            flex: 1;
+
+        }
+
+
+        label {
+
+            display: block;
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        input,
+        select,
+        textarea {
+
+            width: 100%;
+
+            padding: 8px;
+
+            box-sizing: border-box;
+
+        }
+
+
+        textarea {
+
+            resize: vertical;
+
+        }
+
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            margin-top: 15px;
+
+        }
+
+
+        th,
+        td {
+
+            border: 1px solid #ccc;
+
+            padding: 8px;
+
+            text-align: center;
+
+        }
+
+
+        th {
+
+            background: #eee;
+
+        }
+
+
+        table input,
+        table select {
+
+            width: 100%;
+
+        }
+
+
+        button {
+
+            padding: 9px 16px;
+
+            border: none;
+
+            cursor: pointer;
+
+            margin-right: 5px;
+
+        }
+
+
+        .add-btn {
+
+            background: #2d7d46;
+
+            color: white;
+
+        }
+
+
+        .delete-btn {
+
+            background: #c0392b;
+
+            color: white;
+
+        }
+
+
+        .save-btn {
+
+            background: #1769aa;
+
+            color: white;
+
+            font-size: 16px;
+
+            padding: 12px 25px;
+
+        }
+
+
+        .back-btn {
+
+            background: #555;
+
+            color: white;
+
+            font-size: 16px;
+
+            padding: 12px 25px;
+
+        }
+
+
+        .total-box {
+
+            text-align: right;
+
+            margin-top: 20px;
+
+            font-size: 18px;
+
+            font-weight: bold;
+
+        }
+
+
+        .message {
+
+            margin-top: 15px;
+
+            padding: 10px;
+
+            display: none;
+
+        }
+
+
+        .success {
+
+            background: #d4edda;
+
+            color: #155724;
+
+        }
+
+
+        .error {
+
+            background: #f8d7da;
+
+            color: #721c24;
+
+        }
+
+
+        .loading {
+
+            text-align: center;
+
+            padding: 30px;
+
+        }
+
+        .po-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+.tab-btn {
+    background: #eee;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-right: 0;
+}
+
+.tab-btn.active {
+    background: #1769aa;
+    color: white;
+    border-color: #1769aa;
+}
+
+.tab-content {
+    width: 100%;
+}
+
+/* =========================================================
+   Item Select Checkbox
+========================================================= */
+
+.item-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 18px;
+    height: 18px;
+
+    border: 2px solid #777;
+    border-radius: 50%;
+
+    background: white;
+
+    cursor: pointer;
+
+    padding: 0;
+    margin: 0;
+
+    vertical-align: middle;
+}
+
+
+.item-checkbox:checked {
+    background: #1769aa;
+
+    border-color: #1769aa;
+
+    box-shadow:
+        inset 0 0 0 4px white;
+}
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<h1>Edit Purchase Order</h1>
+
+
+<div id="loading" class="loading">
+
+    Loading PO...
+
+</div>
+
+
+<div id="pageContent" style="display:none;">
+
+
+    <!-- =====================================================
+         PO INFORMATION
+    ====================================================== -->
+
+    <div class="section">
+
+        <h2>PO Information</h2>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label>PO Number</label>
+
+                <input
+                    type="text"
+                    id="poNumber"
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>PO Date</label>
+
+                <input
+                    type="date"
+                    id="poDate"
+                    readonly
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label>Supplier / Vendor</label>
+
+                <select id="vendorSelect">
+
+                    <option value="">
+                        -- Select Vendor --
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Ref No</label>
+
+                <input
+                    type="text"
+                    id="refNo"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label>Currency</label>
+
+                <select id="currency">
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+            <label>Status</label>
+
+                <input
+                    type="text"
+                    id="status"
+                    readonly
+                >
+
+            </div>
+
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Description</label>
+
+            <textarea
+                id="description"
+                rows="3"
+            ></textarea>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Photo</label>
+
+            <input
+                    type="file"
+                    id="photo"
+                    accept="image/jpeg,image/png,image/webp"
+            >
+
+            <small>
+                    JPG, PNG or WEBP. Maximum 5 MB.
+            </small>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+     PO ITEMS / OTHERS
+====================================================== -->
+
+<div class="section">
+
+    <!-- Tabs -->
+
+    <div class="po-tabs">
+
+        <button
+            type="button"
+            class="tab-btn active"
+            id="poItemsTab"
+            onclick="showPOItems()"
+        >
+            PO Items
+        </button>
+
+        <button
+            type="button"
+            class="tab-btn"
+            id="othersTab"
+            onclick="showOthers()"
+        >
+            Others
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         PO ITEMS CONTENT
+    ====================================================== -->
+
+    <div
+        id="poItemsContent"
+        class="tab-content"
+    >
+
+        <button
+            type="button"
+            class="add-btn"
+            onclick="addItem()"
+        >
+            + Add Item
+        </button>
+
+
+        <button
+            type="button"
+            class="delete-btn"
+            onclick="deleteSelectedItems()"
+        >
+            Delete Selected
+        </button>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        <input
+                            type="checkbox"
+                            id="selectAllItems"
+                            onchange="toggleSelectAllItems()"
+                        >
+                    </th>
+
+                    <th>No.</th>
+
+                    <th>Item Code</th>
+
+                    <th>Item Name</th>
+
+                    <th>Quantity</th>
+
+                    <th>UOM</th>
+
+                    <th>Unit Price</th>
+
+                    <th>Sub Total</th>
+
+                    <th>Stock Qty</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="itemsBody">
+            </tbody>
+
+        </table>
+
+
+        <div class="total-box">
+
+            <div>
+                Total Qty:
+                <span id="totalQty">0</span>
+            </div>
+
+            <div>
+                Total Amount:
+                <span id="totalAmount">
+                    RM 0.00
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         OTHERS CONTENT
+    ====================================================== -->
+
+    <div
+        id="othersContent"
+        class="tab-content"
+        style="display: none;"
+    >
+
+        <div class="form-row">
+
+            <!-- Created By -->
+
+            <div class="form-group">
+
+                <label>Created By</label>
+
+                <input
+                    type="text"
+                    id="createdBy"
+                    readonly
+                >
+
+            </div>
+
+
+            <!-- Prepared Date -->
+
+            <div class="form-group">
+
+                <label>Prepared Date / ETA</label>
+
+                <input
+                    type="date"
+                    id="preparedDate"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+    <!-- =====================================================
+         BUTTONS
+    ====================================================== -->
+
+    <div class="section">
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            class="save-btn"
+            id="saveButton"
+            onclick="updatePO()"
+        >
+            Save Changes
+        </button>
+
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+/*
+|--------------------------------------------------------------------------
+| Global
+|--------------------------------------------------------------------------
+*/
+
+let products = [];
+
+let vendors = [];
+
+let originalPO = null;
+
+
+/*
+|--------------------------------------------------------------------------
+| Get PO ID
+|--------------------------------------------------------------------------
+*/
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const poId =
+    params.get("po_id");
+
+
+/*
+|--------------------------------------------------------------------------
+| Page Load
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+
+        if (!poId) {
+
+            showMessage(
+                "PO ID is missing.",
+                false
+            );
+
+            return;
+
+        }
+
+
+        await loadProducts();
+
+        await loadVendors();
+
+        await loadPOOptions();
+
+        await loadPO();
+
+    }
+);
+
+/*
+|--------------------------------------------------------------------------
+| Load Products
+|--------------------------------------------------------------------------
+*/
+
+async function loadProducts() {
+
+    const response =
+        await fetch(
+            "../api/products.php"
+        );
+
+
+    const result =
+        await response.json();
+
+
+    if (!result.success) {
+
+        throw new Error(
+            result.message
+        );
+
+    }
+
+
+    products =
+        result.data;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Load Vendors
+|--------------------------------------------------------------------------
+*/
+
+async function loadVendors() {
+
+    const response =
+        await fetch(
+            "../api/vendors.php"
+        );
+
+
+    const result =
+        await response.json();
+
+
+    if (!result.success) {
+
+        throw new Error(
+            result.message
+        );
+
+    }
+
+
+    vendors =
+        result.data;
+
+
+    const select =
+        document.getElementById(
+            "vendorSelect"
+        );
+
+
+    vendors.forEach(
+        function (vendor) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                vendor.Vendor_ID;
+
+
+            option.textContent =
+                vendor.Vendor_ID +
+                " - " +
+                vendor.Vendor_CompanyName;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Load PO Options
+|--------------------------------------------------------------------------
+*/
+
+async function loadPOOptions() {
+
+    try {
+
+        const response =
+            await fetch(
+                "../config/po_options.json"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Failed to load PO options."
+            );
+
+        }
+
+
+        const options =
+            await response.json();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Currency
+        |--------------------------------------------------------------------------
+        */
+
+        const currencySelect =
+            document.getElementById(
+                "currency"
+            );
+
+
+        currencySelect.innerHTML = "";
+
+
+        options.currency.forEach(
+            function (currency) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    currency;
+
+
+                option.textContent =
+                    currency;
+
+
+                currencySelect.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UOM
+        |--------------------------------------------------------------------------
+        */
+
+        window.uomOptions =
+            options.uom;
+
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load PO options:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Load Existing PO
+|--------------------------------------------------------------------------
+*/
+
+async function loadPO() {
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/po_view.php?po_id=" +
+                encodeURIComponent(
+                    poId
+                )
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            throw new Error(
+                result.message
+            );
+
+        }
+
+
+        originalPO =
+            result.data;
+
+
+        displayPO(
+            result.data
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        showMessage(
+            error.message,
+            false
+        );
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Display PO
+|--------------------------------------------------------------------------
+*/
+
+function displayPO(data) {
+
+    const header =
+        data.header;
+
+
+    const items =
+        data.items;
+
+
+    document.getElementById(
+        "poNumber"
+    ).value =
+        header.PO_ID;
+
+
+    document.getElementById(
+        "poDate"
+    ).value =
+        header.PO_Date;
+
+
+    document.getElementById(
+        "vendorSelect"
+    ).value =
+        header.Vendor_ID;
+
+
+    document.getElementById(
+        "refNo"
+    ).value =
+        header.Ref_No || "";
+
+
+    document.getElementById(
+        "currency"
+    ).value =
+        header.Currency;
+
+
+    document.getElementById(
+        "preparedDate"
+    ).value =
+        header.Prepared_Date || "";
+
+
+    document.getElementById(
+        "description"
+    ).value =
+        header.Description || "";
+
+
+    document.getElementById(
+        "createdBy"
+    ).value =
+        header.Created_By || "";
+
+    document.getElementById(
+        "status"
+    ).value =
+        header.Status || "";
+
+
+    /*
+     * Items
+     */
+
+    const tbody =
+        document.getElementById(
+            "itemsBody"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    items.forEach(
+        function (item) {
+
+            createItemRow(
+                item
+            );
+
+        }
+    );
+
+
+    calculateTotals();
+
+
+    document.getElementById(
+        "loading"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "pageContent"
+    ).style.display =
+        "block";
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Create Item Row
+|--------------------------------------------------------------------------
+*/
+
+function createItemRow(item = null) {
+
+    const tbody =
+        document.getElementById(
+            "itemsBody"
+        );
+
+
+    const row =
+        document.createElement(
+            "tr"
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Select Checkbox
+    |--------------------------------------------------------------------------
+    */
+
+    const selectCell =
+        document.createElement(
+            "td"
+        );
+
+
+    const checkbox =
+        document.createElement(
+            "input"
+        );
+
+
+    checkbox.type =
+        "checkbox";
+
+
+    checkbox.className =
+        "item-checkbox";
+
+
+    selectCell.appendChild(
+        checkbox
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Item Number
+    |--------------------------------------------------------------------------
+    */
+
+    const numberCell =
+        document.createElement(
+            "td"
+        );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Product
+    |--------------------------------------------------------------------------
+    */
+
+    const productSelect =
+        document.createElement(
+            "select"
+        );
+
+
+    productSelect.innerHTML =
+        `<option value="">
+            -- Select Product --
+        </option>`;
+
+
+    products.forEach(
+        function (product) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                product.Product_ID;
+
+
+            option.textContent =
+                product.Product_ID +
+                " - " +
+                product.Product_Description;
+
+
+            if (
+                item &&
+                item.Product_ID ===
+                product.Product_ID
+            ) {
+
+                option.selected =
+                    true;
+
+            }
+
+
+            productSelect.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Item Name
+    |--------------------------------------------------------------------------
+    */
+
+    const itemName =
+        document.createElement(
+            "input"
+        );
+
+
+    itemName.type =
+        "text";
+
+
+    itemName.readOnly =
+        true;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Quantity
+    |--------------------------------------------------------------------------
+    */
+
+    const quantity =
+        document.createElement(
+            "input"
+        );
+
+
+    quantity.type =
+        "number";
+
+
+    quantity.min =
+        "1";
+
+
+    quantity.step =
+        "1";
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | UOM
+    |--------------------------------------------------------------------------
+    */
+
+    const uom =
+        document.createElement(
+            "select"
+        );
+
+const uomList =
+    window.uomOptions || [];
+
+
+uomList.forEach(
+    function (value) {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+
+        option.value =
+            value;
+
+
+        option.textContent =
+            value;
+
+
+        uom.appendChild(
+            option
+        );
+
+    }
+);
+    
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Unit Price
+    |--------------------------------------------------------------------------
+    */
+
+    const unitPrice =
+        document.createElement(
+            "input"
+        );
+
+
+    unitPrice.type =
+        "number";
+
+
+    unitPrice.min =
+        "0";
+
+
+    unitPrice.step =
+        "0.01";
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sub Total
+    |--------------------------------------------------------------------------
+    */
+
+    const subTotal =
+        document.createElement(
+            "input"
+        );
+
+
+    subTotal.type =
+        "text";
+
+
+    subTotal.readOnly =
+        true;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stock Qty
+    |--------------------------------------------------------------------------
+    */
+
+    const stockQty =
+        document.createElement(
+            "input"
+        );
+
+
+    stockQty.type =
+        "number";
+
+
+    stockQty.min =
+        "0";
+
+
+    stockQty.step =
+        "1";
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Existing Data
+    |--------------------------------------------------------------------------
+    */
+
+    if (item) {
+
+        itemName.value =
+            item.Item_Name || "";
+
+
+        quantity.value =
+            item.Quantity;
+
+
+        uom.value =
+            item.UOM;
+
+
+        unitPrice.value =
+            parseFloat(
+                item.Unit_Price
+            ).toFixed(2);
+
+
+        subTotal.value =
+            parseFloat(
+                item.Sub_Total
+            ).toFixed(2);
+
+
+        stockQty.value =
+            item.Stock_Qty || 0;
+
+    } else {
+
+        quantity.value =
+            1;
+
+
+        uom.value =
+            "PCS";
+
+
+        unitPrice.value =
+            "0.00";
+
+
+        subTotal.value =
+            "0.00";
+
+
+        stockQty.value =
+            0;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Product Change
+    |--------------------------------------------------------------------------
+    */
+
+    productSelect.addEventListener(
+        "change",
+        function () {
+
+            const product =
+                products.find(
+                    function (p) {
+
+                        return p.Product_ID ===
+                            productSelect.value;
+
+                    }
+                );
+
+
+            if (product) {
+
+                itemName.value =
+                    product.Product_Description;
+
+            } else {
+
+                itemName.value =
+                    "";
+
+            }
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Calculate Subtotal
+    |--------------------------------------------------------------------------
+    */
+
+    function updateSubtotal() {
+
+        const qty =
+            parseInt(
+                quantity.value
+            ) || 0;
+
+
+        const price =
+            parseFloat(
+                unitPrice.value
+            ) || 0;
+
+
+        subTotal.value =
+            (
+                qty * price
+            ).toFixed(2);
+
+
+        calculateTotals();
+
+    }
+
+
+    quantity.addEventListener(
+        "input",
+        updateSubtotal
+    );
+
+
+    unitPrice.addEventListener(
+        "input",
+        updateSubtotal
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cells
+    |--------------------------------------------------------------------------
+    */
+
+    const productCell =
+        document.createElement(
+            "td"
+        );
+
+    productCell.appendChild(
+        productSelect
+    );
+
+
+    const nameCell =
+        document.createElement(
+            "td"
+        );
+
+    nameCell.appendChild(
+        itemName
+    );
+
+
+    const quantityCell =
+        document.createElement(
+            "td"
+        );
+
+    quantityCell.appendChild(
+        quantity
+    );
+
+
+    const uomCell =
+        document.createElement(
+            "td"
+        );
+
+    uomCell.appendChild(
+        uom
+    );
+
+
+    const priceCell =
+        document.createElement(
+            "td"
+        );
+
+    priceCell.appendChild(
+        unitPrice
+    );
+
+
+    const subtotalCell =
+        document.createElement(
+            "td"
+        );
+
+    subtotalCell.appendChild(
+        subTotal
+    );
+
+
+    const stockCell =
+        document.createElement(
+            "td"
+        );
+
+    stockCell.appendChild(
+        stockQty
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Append Row
+    |--------------------------------------------------------------------------
+    */
+
+    row.appendChild(
+        selectCell
+    );
+
+
+    row.appendChild(
+        numberCell
+    );
+
+
+    row.appendChild(
+        productCell
+    );
+
+
+    row.appendChild(
+        nameCell
+    );
+
+
+    row.appendChild(
+        quantityCell
+    );
+
+
+    row.appendChild(
+        uomCell
+    );
+
+
+    row.appendChild(
+        priceCell
+    );
+
+
+    row.appendChild(
+        subtotalCell
+    );
+
+
+    row.appendChild(
+        stockCell
+    );
+
+
+    tbody.appendChild(
+        row
+    );
+
+
+    updateNumbers();
+
+}
+    
+
+/*
+|--------------------------------------------------------------------------
+| Add Item
+|--------------------------------------------------------------------------
+*/
+
+function addItem() {
+
+    if (products.length === 0) {
+
+        alert(
+            "No products available."
+        );
+
+        return;
+
+    }
+
+
+    createItemRow();
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Update Numbers
+|--------------------------------------------------------------------------
+*/
+
+function updateNumbers() {
+
+    const rows =
+        document.querySelectorAll(
+            "#itemsBody tr"
+        );
+
+
+    rows.forEach(
+        function (row, index) {
+
+            row.children[1]
+                .textContent =
+                index + 1;
+
+        }
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Calculate Totals
+|--------------------------------------------------------------------------
+*/
+
+function calculateTotals() {
+
+    let totalQty =
+        0;
+
+
+    let totalAmount =
+        0;
+
+
+    const rows =
+        document.querySelectorAll(
+            "#itemsBody tr"
+        );
+
+
+    rows.forEach(
+        function (row) {
+
+            const inputs =
+                row.querySelectorAll(
+                    "input"
+                );
+
+
+            if (inputs.length < 6) {
+
+                return;
+
+            }
+
+
+            const quantity =
+                parseInt(
+                    inputs[2].value
+                ) || 0;
+
+
+            const subtotal =
+                parseFloat(
+                    inputs[4].value
+                ) || 0;
+
+
+            totalQty +=
+                quantity;
+
+
+            totalAmount +=
+                subtotal;
+
+        }
+    );
+
+
+    document.getElementById(
+        "totalQty"
+    ).textContent =
+        totalQty;
+
+
+    const currency =
+        document.getElementById(
+            "currency"
+        ).value;
+
+
+    document.getElementById(
+        "totalAmount"
+    ).textContent =
+        currency +
+        " " +
+        totalAmount.toFixed(2);
+
+}
+    
+
+/*
+|--------------------------------------------------------------------------
+| Currency
+|--------------------------------------------------------------------------
+*/
+
+document.getElementById(
+    "currency"
+).addEventListener(
+    "change",
+    calculateTotals
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Collect Items
+|--------------------------------------------------------------------------
+*/
+function collectItems() {
+
+    const rows =
+        document.querySelectorAll(
+            "#itemsBody tr"
+        );
+
+
+    const items = [];
+
+
+    rows.forEach(
+        function (row) {
+
+            const selects =
+                row.querySelectorAll(
+                    "select"
+                );
+
+
+            const inputs =
+                row.querySelectorAll(
+                    "input"
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Input Order
+            |--------------------------------------------------------------------------
+            |
+            | inputs[0] = Checkbox
+            | inputs[1] = Item Name
+            | inputs[2] = Quantity
+            | inputs[3] = Unit Price
+            | inputs[4] = Sub Total
+            | inputs[5] = Stock Qty
+            |
+            |--------------------------------------------------------------------------
+            */
+
+
+            items.push({
+
+                product_id:
+                    selects[0].value,
+
+                item_name:
+                    inputs[1].value,
+
+                quantity:
+                    parseInt(
+                        inputs[2].value
+                    ),
+
+                uom:
+                    selects[1].value,
+
+                unit_price:
+                    parseFloat(
+                        inputs[3].value
+                    ),
+
+                sub_total:
+                    parseFloat(
+                        inputs[4].value
+                    ),
+
+                stock_qty:
+                    parseInt(
+                        inputs[5].value
+                    ) || 0
+
+            });
+
+        }
+    );
+
+
+    return items;
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| Update PO
+|--------------------------------------------------------------------------
+*/
+
+async function updatePO() {
+
+    clearMessage();
+
+
+    const vendorId =
+        document.getElementById(
+            "vendorSelect"
+        ).value;
+
+
+    if (!vendorId) {
+
+        showMessage(
+            "Please select a Vendor.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    const items =
+        collectItems();
+
+
+    if (items.length === 0) {
+
+        showMessage(
+            "At least one item is required.",
+            false
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Validate
+     */
+
+    for (
+        let i = 0;
+        i < items.length;
+        i++
+    ) {
+
+        const item =
+            items[i];
+
+
+        if (!item.product_id) {
+
+            showMessage(
+                `Please select Product for Item ${i + 1}.`,
+                false
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !Number.isInteger(
+                item.quantity
+            ) ||
+            item.quantity <= 0
+        ) {
+
+            showMessage(
+                `Invalid quantity for Item ${i + 1}.`,
+                false
+            );
+
+            return;
+
+        }
+
+
+        if (
+            isNaN(
+                item.unit_price
+            ) ||
+            item.unit_price < 0
+        ) {
+
+            showMessage(
+                `Invalid unit price for Item ${i + 1}.`,
+                false
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    const data = {
+
+        po_id:
+            poId,
+
+        vendor_id:
+            vendorId,
+
+        ref_no:
+            document.getElementById(
+                "refNo"
+            ).value.trim(),
+
+        description:
+            document.getElementById(
+                "description"
+            ).value.trim(),
+
+        currency:
+            document.getElementById(
+                "currency"
+            ).value,
+
+        prepared_date:
+            document.getElementById(
+                "preparedDate"
+            ).value ||
+            null,
+
+        items:
+            items
+
+    };
+
+
+    const saveButton =
+        document.getElementById(
+            "saveButton"
+        );
+
+
+    saveButton.disabled =
+        true;
+
+
+    saveButton.textContent =
+        "Saving...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/po_update.php",
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify(
+                            data
+                        )
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            showMessage(
+                "Failed to update PO: " +
+                result.message,
+                false
+            );
+
+            return;
+
+        }
+
+
+        showMessage(
+            "PO updated successfully.",
+            true
+        );
+
+
+        alert(
+            "PO updated successfully!\n\n" +
+            "PO Number: " +
+            result.data.po_id +
+            "\n" +
+            "Total Qty: " +
+            result.data.total_qty +
+            "\n" +
+            "Total Amount: " +
+            result.data.total_amount
+        );
+
+
+        /*
+         * Go back to View
+         */
+
+        window.location.href =
+            "po/po_view.html?po_id=" +
+            encodeURIComponent(
+                poId
+            );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        showMessage(
+            "Server error.",
+            false
+        );
+
+    } finally {
+
+        saveButton.disabled =
+            false;
+
+        saveButton.textContent =
+            "Save Changes";
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Back
+|--------------------------------------------------------------------------
+*/
+
+function goBack() {
+
+    window.location.href =
+        "po_view.html?po_id=" +
+        encodeURIComponent(
+            poId
+        );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Message
+|--------------------------------------------------------------------------
+*/
+
+function showMessage(
+    message,
+    success
+) {
+
+    const element =
+        document.getElementById(
+            "message"
+        );
+
+
+    element.textContent =
+        message;
+
+
+    element.className =
+        "message " +
+        (
+            success
+                ? "success"
+                : "error"
+        );
+
+
+    element.style.display =
+        "block";
+
+
+    document.getElementById(
+        "loading"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "pageContent"
+    ).style.display =
+        "block";
+
+}
+
+
+function clearMessage() {
+
+    document.getElementById(
+        "message"
+    ).style.display =
+        "none";
+
+}
+
+function deleteSelectedItems() {
+
+    const selected =
+        document.querySelectorAll(
+            ".item-checkbox:checked"
+        );
+
+
+    if (selected.length === 0) {
+
+        alert(
+            "Please select at least one item to delete."
+        );
+
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete " +
+            selected.length +
+            " selected item(s)?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    selected.forEach(
+        function (checkbox) {
+
+            const row =
+                checkbox.closest("tr");
+
+
+            if (row) {
+
+                row.remove();
+
+            }
+
+        }
+    );
+
+
+    updateNumbers();
+
+    calculateTotals();
+
+
+    document.getElementById(
+        "selectAllItems"
+    ).checked = false;
+
+}
+
+function toggleSelectAllItems() {
+
+    const selectAll =
+        document.getElementById(
+            "selectAllItems"
+        );
+
+
+    const checkboxes =
+        document.querySelectorAll(
+            ".item-checkbox"
+        );
+
+
+    checkboxes.forEach(
+        function (checkbox) {
+
+            checkbox.checked =
+                selectAll.checked;
+
+        }
+    );
+
+}
+
+/*
+|--------------------------------------------------------------------------
+| Show PO Items
+|--------------------------------------------------------------------------
+*/
+
+function showPOItems() {
+
+    document.getElementById(
+        "poItemsContent"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "othersContent"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "poItemsTab"
+    ).classList.add(
+        "active"
+    );
+
+
+    document.getElementById(
+        "othersTab"
+    ).classList.remove(
+        "active"
+    );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Show Others
+|--------------------------------------------------------------------------
+*/
+
+function showOthers() {
+
+    document.getElementById(
+        "poItemsContent"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "othersContent"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "poItemsTab"
+    ).classList.remove(
+        "active"
+    );
+
+
+    document.getElementById(
+        "othersTab"
+    ).classList.add(
+        "active"
+    );
+
+}
+
+</script>
+
+
+</body>
+
+</html>

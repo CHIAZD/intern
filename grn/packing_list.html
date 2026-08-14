@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Packing List</title>
+
+
+    <style>
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            margin: 30px;
+
+            background: #f5f5f5;
+
+        }
+
+
+        .packing-list {
+
+            background: white;
+
+            padding: 30px;
+
+            max-width: 1100px;
+
+            margin: auto;
+
+            border: 1px solid #ddd;
+
+        }
+
+
+        .header {
+
+            text-align: center;
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .header h1 {
+
+            margin: 0;
+
+            font-size: 28px;
+
+        }
+
+
+        .info-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .info-table td {
+
+            padding: 8px;
+
+            border: 1px solid #ddd;
+
+        }
+
+
+        .info-label {
+
+            font-weight: bold;
+
+            width: 180px;
+
+            background: #f2f2f2;
+
+        }
+
+
+        .items-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            margin-top: 15px;
+
+        }
+
+
+        .items-table th,
+        .items-table td {
+
+            border: 1px solid #333;
+
+            padding: 8px;
+
+            text-align: center;
+
+        }
+
+
+        .items-table th {
+
+            background: #eee;
+
+        }
+
+
+        .items-table td:nth-child(3) {
+
+            text-align: left;
+
+        }
+
+
+        .total-section {
+
+            margin-top: 20px;
+
+            text-align: right;
+
+            font-weight: bold;
+
+        }
+
+
+        .footer {
+
+            margin-top: 50px;
+
+        }
+
+
+        .footer-table {
+
+            width: 100%;
+
+        }
+
+
+        .footer-table td {
+
+            padding: 10px;
+
+        }
+
+
+        .button-area {
+
+            max-width: 1100px;
+
+            margin: 20px auto;
+
+        }
+
+
+        button {
+
+            padding: 10px 18px;
+
+            margin-right: 8px;
+
+            border: none;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+        }
+
+
+        .print-btn {
+
+            background: #1769aa;
+
+            color: white;
+
+        }
+
+
+        .back-btn {
+
+            background: #555;
+
+            color: white;
+
+        }
+
+
+        .loading {
+
+            text-align: center;
+
+            padding: 30px;
+
+        }
+
+
+        /* =====================================================
+           PRINT / PDF
+        ===================================================== */
+
+        @media print {
+
+            body {
+
+                background: white;
+
+                margin: 0;
+
+            }
+
+
+            .button-area {
+
+                display: none;
+
+            }
+
+
+            .packing-list {
+
+                border: none;
+
+                max-width: none;
+
+                padding: 0;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div id="loading" class="loading">
+
+    Loading Packing List...
+
+</div>
+
+
+<div
+    id="packingList"
+    class="packing-list"
+    style="display:none;"
+>
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="header">
+
+        <h1>
+            PACKING LIST
+        </h1>
+
+    </div>
+
+
+    <!-- =====================================================
+         GRN INFORMATION
+    ====================================================== -->
+
+    <table class="info-table">
+
+        <tr>
+
+            <td class="info-label">
+                GRN ID
+            </td>
+
+            <td id="grnId">
+            </td>
+
+            <td class="info-label">
+                GRN Date
+            </td>
+
+            <td id="grnDate">
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <td class="info-label">
+                PO Number
+            </td>
+
+            <td id="poId">
+            </td>
+
+            <td class="info-label">
+                Status
+            </td>
+
+            <td id="status">
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <td class="info-label">
+                Created By
+            </td>
+
+            <td id="createdBy">
+            </td>
+
+            <td class="info-label">
+                Created At
+            </td>
+
+            <td id="createdAt">
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <td class="info-label">
+                ETD
+            </td>
+
+            <td id="etd">
+            </td>
+
+            <td class="info-label">
+                ETA
+            </td>
+
+            <td id="eta">
+            </td>
+
+        </tr>
+
+    </table>
+
+
+    <!-- =====================================================
+         ITEMS
+    ====================================================== -->
+
+    <h3>
+        Packing Details
+    </h3>
+
+
+    <table class="items-table">
+
+        <thead>
+
+            <tr>
+
+                <th>No.</th>
+
+                <th>Item Code</th>
+
+                <th>Item Name</th>
+
+                <th>QTY</th>
+
+                <th>UOM</th>
+
+                <th>QTY / Carton</th>
+
+                <th>Total QTY</th>
+
+                <th>Carton</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="itemsBody">
+
+        </tbody>
+
+    </table>
+
+
+    <!-- =====================================================
+         TOTAL
+    ====================================================== -->
+
+    <div class="total-section">
+
+        <div>
+            Total Quantity:
+            <span id="totalQty">
+                0
+            </span>
+        </div>
+
+
+        <div>
+            Total Carton:
+            <span id="totalCarton">
+                0
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <div class="footer">
+
+        <table class="footer-table">
+
+            <tr>
+
+                <td>
+                    Prepared By:
+                    <strong id="footerCreatedBy"></strong>
+                </td>
+
+                <td>
+                    Date:
+                    <strong id="footerDate"></strong>
+                </td>
+
+            </tr>
+
+        </table>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     BUTTONS
+====================================================== -->
+
+<div class="button-area">
+
+    <button
+        class="back-btn"
+        onclick="goBack()"
+    >
+        Back
+    </button>
+
+
+    <button
+        class="print-btn"
+        onclick="printPackingList()"
+    >
+        Export / Print PDF
+    </button>
+
+</div>
+
+
+<script>
+
+
+// ============================================================
+// GET GRN ID
+// ============================================================
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const grnId =
+    params.get("grn_id");
+
+
+// ============================================================
+// LOAD GRN
+// ============================================================
+
+async function loadPackingList() {
+
+    if (!grnId) {
+
+        document.getElementById(
+            "loading"
+        ).textContent =
+            "GRN ID is missing.";
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "../api/grn_view.php?grn_id=" +
+                encodeURIComponent(
+                    grnId
+                )
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!result.success) {
+
+            throw new Error(
+                result.message ||
+                "Failed to load GRN."
+            );
+
+        }
+
+
+        const grn =
+            result.grn;
+
+
+        const items =
+            result.items || [];
+
+
+        // ====================================================
+        // GRN INFORMATION
+        // ====================================================
+
+        document.getElementById(
+            "grnId"
+        ).textContent =
+            grn.GRN_ID || "";
+
+
+        document.getElementById(
+            "grnDate"
+        ).textContent =
+            grn.GRN_Date || "";
+
+
+        document.getElementById(
+            "poId"
+        ).textContent =
+            grn.PO_ID || "-";
+
+
+        document.getElementById(
+            "status"
+        ).textContent =
+            grn.Status || "-";
+
+
+        document.getElementById(
+            "createdBy"
+        ).textContent =
+            grn.Created_By || "-";
+
+
+        document.getElementById(
+            "createdAt"
+        ).textContent =
+            grn.Created_At || "-";
+
+
+        document.getElementById(
+            "etd"
+        ).textContent =
+            grn.ETD_Date || "-";
+
+
+        document.getElementById(
+            "eta"
+        ).textContent =
+            grn.ETA_Date || "-";
+
+
+        document.getElementById(
+            "footerCreatedBy"
+        ).textContent =
+            grn.Created_By || "-";
+
+
+        document.getElementById(
+            "footerDate"
+        ).textContent =
+            grn.GRN_Date || "-";
+
+
+        // ====================================================
+        // ITEMS
+        // ====================================================
+
+        const tbody =
+            document.getElementById(
+                "itemsBody"
+            );
+
+
+        tbody.innerHTML = "";
+
+
+        let totalQty = 0;
+
+        let totalCarton = 0;
+
+
+        items.forEach(
+            function (item, index) {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const quantity =
+                    parseInt(
+                        item.Quantity
+                    ) || 0;
+
+
+                const qtyPerCarton =
+                    parseInt(
+                        item.Qty_Per_Carton
+                    ) || 0;
+
+
+                const itemTotalQty =
+                    parseInt(
+                        item.Total_Qty
+                    ) ||
+                    quantity;
+
+
+                let carton = 0;
+
+
+                if (
+                    qtyPerCarton > 0
+                ) {
+
+                    carton =
+                        Math.ceil(
+                            itemTotalQty /
+                            qtyPerCarton
+                        );
+
+                }
+
+
+                totalQty +=
+                    itemTotalQty;
+
+
+                totalCarton +=
+                    carton;
+
+
+                row.innerHTML = `
+
+                    <td>
+                        ${index + 1}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.Product_ID
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.Item_Name
+                        )}
+                    </td>
+
+                    <td>
+                        ${quantity}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            item.UOM
+                        )}
+                    </td>
+
+                    <td>
+                        ${qtyPerCarton}
+                    </td>
+
+                    <td>
+                        ${itemTotalQty}
+                    </td>
+
+                    <td>
+                        ${carton}
+                    </td>
+
+                `;
+
+
+                tbody.appendChild(
+                    row
+                );
+
+            }
+        );
+
+
+        document.getElementById(
+            "totalQty"
+        ).textContent =
+            totalQty;
+
+
+        document.getElementById(
+            "totalCarton"
+        ).textContent =
+            totalCarton;
+
+
+        // ====================================================
+        // SHOW PAGE
+        // ====================================================
+
+        document.getElementById(
+            "loading"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "packingList"
+        ).style.display =
+            "block";
+
+
+    }
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        document.getElementById(
+            "loading"
+        ).textContent =
+            "Failed to load Packing List: " +
+            error.message;
+
+    }
+
+}
+
+
+// ============================================================
+// PRINT / PDF
+// ============================================================
+
+function printPackingList() {
+
+    window.print();
+
+}
+
+
+// ============================================================
+// BACK
+// ============================================================
+
+function goBack() {
+
+    window.location.href =
+        "grn_view.html?grn_id=" +
+        encodeURIComponent(
+            grnId
+        );
+
+}
+
+
+// ============================================================
+// HTML ESCAPE
+// ============================================================
+
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// ============================================================
+// START
+// ============================================================
+
+loadPackingList();
+
+</script>
+
+
+</body>
+
+</html>
